@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CX India Dashboard</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<!-- ★ All customisation lives in config.js — edit that file only ★ -->
+<script src="config.js"></script>
+<style id="themeStyle">/* injected by applyTheme() */</style>
+<style>
+/* ── RESET & BASE ── */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--pale);color:var(--dark);font-size:13px}
+.layout{max-width:1400px;margin:0 auto;padding:18px 24px 36px}
+
+/* ── HEADER ── */
+.header{background:var(--base);border-radius:14px;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px}
+.header h1{font-size:16px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px}
+.header h1 i{color:var(--orange);font-size:20px}
+.header-meta{font-size:10px;color:var(--light);margin-top:2px}
+.header-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.hbadge{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;background:var(--orange);color:#fff;display:flex;align-items:center;gap:4px}
+.sync-btn{padding:4px 11px;border-radius:12px;font-size:10px;font-weight:600;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);cursor:pointer;display:flex;align-items:center;gap:4px;transition:background .15s}
+.sync-btn:hover{background:rgba(255,255,255,.25)}
+.sync-status{font-size:10px;color:var(--light);white-space:nowrap;display:flex;align-items:center;gap:4px}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#27AE60;flex-shrink:0}
+.sync-dot.loading{background:#FF7722;animation:blink 1s infinite}
+.sync-dot.error{background:#E24B4A}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── CONFIG BAR ── */
+.config-bar{background:var(--mid);border-radius:10px;padding:8px 16px;display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.config-bar label{font-size:10px;color:var(--light);white-space:nowrap;font-weight:600}
+.config-bar input[type=text]{flex:1;min-width:200px;padding:5px 9px;border-radius:7px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-size:10px}
+.config-bar input[type=text]::placeholder{color:rgba(255,255,255,.35)}
+.config-bar input[type=text]:focus{outline:none;border-color:var(--orange)}
+.gid-input{max-width:80px!important;min-width:70px!important}
+.cfg-btn{padding:5px 14px;border:none;border-radius:7px;background:var(--orange);color:#fff;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s}
+.cfg-btn:hover{background:var(--orangeDark)}
+.config-note{font-size:9px;color:rgba(255,255,255,.4)}
+
+/* ── KPI STRIP ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.kpi{background:#fff;border-radius:12px;border:1px solid var(--border);padding:12px 15px;position:relative;overflow:hidden;transition:transform .15s}
+.kpi:hover{transform:translateY(-2px)}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--orange)}
+.kpi-lbl{font-size:9px;color:#5A566E;text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:3px}
+.kpi-val{font-size:22px;font-weight:800;color:var(--base);line-height:1}
+.kpi-sub{font-size:9px;color:#9490B0;margin-top:2px}
+.kpi-ico{position:absolute;right:12px;top:14px;font-size:20px;color:var(--border)}
+
+/* ── STAR CARD ── */
+.star-card{background:var(--base);border-radius:12px;padding:14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.star-avatar{width:54px;height:54px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:#fff;flex-shrink:0;border:2px solid var(--orangeLight)}
+.star-info{flex:1;min-width:160px}
+.star-name{font-size:14px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.star-name i{color:var(--orange);margin-right:5px}
+.star-role{font-size:9px;color:var(--light);margin-top:2px}
+.star-stats{display:flex;gap:14px;margin-top:8px;flex-wrap:wrap}
+.ss-val{font-size:14px;font-weight:700;color:var(--orange)}
+.ss-lbl{font-size:8px;color:var(--light);text-transform:uppercase;letter-spacing:.4px}
+.star-badge{background:var(--orange);color:#fff;font-size:10px;font-weight:700;padding:4px 12px;border-radius:12px;align-self:flex-start;white-space:nowrap}
+
+/* ── CARDS ── */
+.sec-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.card{background:#fff;border-radius:12px;border:1px solid var(--border);padding:14px}
+.card-full{background:#fff;border-radius:12px;border:1px solid var(--border);padding:14px;margin-bottom:12px}
+.ct{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:5px}
+.ct i{color:var(--orange);font-size:13px}
+
+/* ── TARGET INPUT ── */
+.tgt-input-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.tgt-input-row label{font-size:10px;color:#5A566E}
+.tgt-input-row input{width:68px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:11px;color:var(--base)}
+.tgt-input-row input:focus{outline:none;border-color:var(--accent)}
+.tgt-btn{padding:4px 12px;border:none;border-radius:6px;background:var(--accent);color:#fff;font-size:10px;font-weight:700;cursor:pointer;transition:background .15s}
+.tgt-btn:hover{background:var(--base)}
+
+/* ══════════════════════════════════════
+   GLASS SHINE BARS
+   Dual-layer pseudo-element technique:
+   ::before = top-edge glint strip
+   ::after  = diagonal body sweep
+   ══════════════════════════════════════ */
+
+/* TVA bars */
+.tva-item{margin-bottom:10px}
+.tva-name-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.tva-name{font-size:11px;font-weight:600;color:var(--base)}
+.tva-pct-lbl{font-size:10px;font-weight:700}
+.tva-track{height:18px;background:var(--tint);border-radius:6px;overflow:hidden;position:relative}
+.tva-fill{
+  height:100%;border-radius:6px;width:0;
+  transition:width 1.3s cubic-bezier(.4,0,.2,1);
+  position:relative;display:flex;align-items:center;justify-content:flex-end;
+  padding-right:7px;overflow:hidden;
+}
+.tva-fill::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:38%;
+  background:linear-gradient(180deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,0) 100%);
+  pointer-events:none;border-radius:6px 6px 0 0;
+}
+.tva-fill::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(115deg,rgba(255,255,255,.30) 0%,rgba(255,255,255,.10) 40%,rgba(255,255,255,0) 65%,rgba(0,0,0,.06) 100%);
+  pointer-events:none;
+}
+.tva-fill span{font-size:9px;font-weight:700;color:#fff;white-space:nowrap;position:relative;z-index:2;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.tva-sub{display:flex;justify-content:space-between;font-size:9px;color:#9490B0;margin-top:2px}
+
+/* Performance bars */
+.perf-item{margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid var(--tint)}
+.perf-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.perf-head{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.perf-avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;flex-shrink:0}
+.perf-name{font-size:11px;font-weight:600;color:var(--base);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.perf-rank{font-size:10px;font-weight:700;width:16px;text-align:center;flex-shrink:0}
+.perf-bars{display:flex;flex-direction:column;gap:4px;padding-left:31px}
+.bar-row{display:flex;align-items:center;gap:7px}
+.bar-lbl{font-size:9px;color:#9490B0;width:26px;text-align:right;flex-shrink:0}
+.bar-outer{flex:1;height:9px;background:var(--tint);border-radius:5px;overflow:hidden;position:relative}
+.bar-inner{
+  height:100%;border-radius:5px;width:0;
+  transition:width 1.3s cubic-bezier(.4,0,.2,1);
+  position:relative;overflow:hidden;
+}
+.bar-inner::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:42%;
+  background:linear-gradient(180deg,rgba(255,255,255,.60) 0%,rgba(255,255,255,0) 100%);
+  pointer-events:none;
+}
+.bar-inner::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(115deg,rgba(255,255,255,.28) 0%,rgba(255,255,255,.08) 45%,rgba(255,255,255,0) 65%,rgba(0,0,0,.05) 100%);
+  pointer-events:none;
+}
+.bar-tip{font-size:9px;font-weight:700;width:32px;text-align:right;flex-shrink:0}
+
+/* Colour key swatches */
+.ckey{display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:9px;color:#5A566E;margin-bottom:10px}
+.cki{display:flex;align-items:center;gap:4px}
+.cksw{width:28px;height:10px;border-radius:4px;position:relative;overflow:hidden;flex-shrink:0}
+.cksw::before{content:'';position:absolute;top:0;left:0;right:0;height:45%;background:linear-gradient(180deg,rgba(255,255,255,.60) 0%,rgba(255,255,255,0) 100%)}
+.cksw::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.3) 0%,rgba(255,255,255,0) 55%)}
+
+/* Mini table bars */
+.mini-bar-outer{height:6px;background:var(--tint);border-radius:3px;overflow:hidden;margin-top:2px;position:relative}
+.mini-bar-inner{
+  height:100%;border-radius:3px;width:0;
+  transition:width 1.4s cubic-bezier(.4,0,.2,1);
+  position:relative;overflow:hidden;
+}
+.mini-bar-inner::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:50%;
+  background:linear-gradient(180deg,rgba(255,255,255,.65) 0%,rgba(255,255,255,0) 100%);
+}
+.mini-bar-inner::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(115deg,rgba(255,255,255,.25) 0%,rgba(255,255,255,0) 60%,rgba(0,0,0,.04) 100%);
+}
+.vl{font-size:9px;font-weight:700}
+
+/* Contrib bars */
+.contrib-item{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.contrib-rank{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;flex-shrink:0}
+.contrib-bar-outer{flex:1;height:8px;background:var(--tint);border-radius:4px;overflow:hidden;position:relative}
+.contrib-bar-inner{
+  height:100%;border-radius:4px;width:0;
+  transition:width 1.3s cubic-bezier(.4,0,.2,1);
+  position:relative;overflow:hidden;
+}
+.contrib-bar-inner::before{content:'';position:absolute;top:0;left:0;right:0;height:45%;background:linear-gradient(180deg,rgba(255,255,255,.62) 0%,rgba(255,255,255,0) 100%)}
+.contrib-bar-inner::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.30) 0%,rgba(255,255,255,.08) 45%,rgba(255,255,255,0) 65%,rgba(0,0,0,.04) 100%)}
+.contrib-pct{font-size:10px;font-weight:700;color:var(--accent);min-width:34px;text-align:right}
+
+/* ── TABLE ── */
+.tab-bar{display:flex;border-bottom:2px solid var(--border);margin-bottom:10px}
+.tab{padding:7px 16px;font-size:11px;font-weight:600;color:#9490B0;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s}
+.tab.active{color:var(--accent);border-bottom-color:var(--orange)}
+.tab:hover{color:var(--accent)}
+.search-bar{width:100%;padding:7px 11px;border:1px solid var(--border);border-radius:8px;font-size:11px;background:#fff;margin-bottom:9px;outline:none;color:var(--dark)}
+.search-bar:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(78,41,168,.1)}
+.twrap{overflow-x:auto;max-height:360px;overflow-y:auto;border-radius:8px;border:1px solid var(--tint)}
+table{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed}
+thead th{position:sticky;top:0;background:var(--base);color:#fff;padding:7px 9px;text-align:left;font-weight:600;font-size:9px;text-transform:uppercase;letter-spacing:.4px;cursor:pointer;white-space:nowrap;z-index:2}
+thead th:hover{background:var(--mid)}
+tbody tr{border-bottom:1px solid var(--tint);transition:background .1s}
+tbody tr:hover{background:var(--paleorange)}
+tbody td{padding:6px 9px;color:#2E2A3A;overflow:hidden}
+.pill{display:inline-block;padding:2px 7px;border-radius:8px;font-size:9px;font-weight:700}
+.pg{background:#E8F5E9;color:#1B5E20}.pa{background:#FFF3E0;color:#BF360C}
+.pr{background:#FFEBEE;color:#B71C1C}.pb{background:var(--tint);color:var(--accent)}
+
+/* ── DONUT ── */
+.donut-wrap{position:relative;width:190px;height:190px;margin:0 auto 10px}
+
+/* ── FOOTER ── */
+.footer{text-align:center;padding:16px 0 6px;font-size:10px;color:#9490B0}
+.footer strong{color:var(--accent)}
+
+/* ── LOADING OVERLAY ── */
+#overlay{position:fixed;inset:0;background:var(--base);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s}
+#overlay.hidden{opacity:0;pointer-events:none}
+.ov-title{font-size:28px;font-weight:800;color:#fff;margin-bottom:6px}
+.ov-title span{color:var(--orange)}
+.ov-msg{font-size:12px;color:var(--light)}
+.ov-bar{width:220px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin-top:16px;overflow:hidden}
+.ov-prog{height:100%;background:var(--orange);width:0;border-radius:2px;transition:width .4s}
+
+@media(max-width:900px){
+  .kpi-grid{grid-template-columns:repeat(3,1fr)}
+  .sec-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="overlay">
+  <div class="ov-title">CX <span>India</span> Dashboard</div>
+  <div class="ov-msg" id="ovMsg">Initialising…</div>
+  <div class="ov-bar"><div class="ov-prog" id="ovProg"></div></div>
+</div>
+
+<div class="layout">
+
+  <div class="header">
+    <div>
+      <h1><i class="ti ti-headset"></i><span id="hTitle"></span></h1>
+      <div class="header-meta" id="headerMeta"></div>
+    </div>
+    <div class="header-right">
+      <span class="sync-status">
+        <span class="sync-dot" id="syncDot"></span>
+        <span id="syncMsg">Ready</span>
+      </span>
+      <button class="sync-btn" onclick="fetchSheetData()">
+        <i class="ti ti-refresh" style="font-size:11px"></i>Refresh now
+      </button>
+      <span class="hbadge" id="hBadge"></span>
+    </div>
+  </div>
+
+  <div class="config-bar">
+    <label><i class="ti ti-brand-google" style="font-size:12px;margin-right:2px"></i>Google Sheet ID:</label>
+    <input type="text" id="sheetIdInput" placeholder="Paste Sheet ID from URL"/>
+    <label>Tab GID:</label>
+    <input type="text" class="gid-input" id="gidInput" placeholder="0" value="0"/>
+    <button class="cfg-btn" onclick="fetchSheetData()">
+      <i class="ti ti-plug-connected" style="font-size:11px;margin-right:3px"></i>Connect &amp; Load
+    </button>
+    <span class="config-note">File → Share → Publish to web → copy ID from URL between /d/ and /edit</span>
+  </div>
+
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <div class="star-card" id="starCard" style="display:none"></div>
+
+  <div class="sec-row">
+    <div class="card" id="secTVA" style="display:none">
+      <div class="ct"><i class="ti ti-target"></i>Target vs achievement</div>
+      <div class="tgt-input-row">
+        <label>Daily target (calls/agent):</label>
+        <input type="number" id="tgtInput" min="1" max="999"/>
+        <button class="tgt-btn" onclick="renderAll()">Apply</button>
+      </div>
+      <div id="tvaList"></div>
+    </div>
+    <div class="card" id="secPerf" style="display:none;overflow-y:auto;max-height:560px">
+      <div class="ct"><i class="ti ti-chart-bar"></i>Agent performance bars</div>
+      <div class="ckey">
+        <span style="font-weight:700;color:var(--accent);font-size:9px">Bar colours:</span>
+        <span class="cki"><span class="cksw" id="swHigh"></span>High</span>
+        <span class="cki"><span class="cksw" id="swMid"></span>Medium</span>
+        <span class="cki"><span class="cksw" id="swLow"></span>Low</span>
+        <span style="font-size:8px;color:#9490B0">Hold &amp; AHT: lower = better</span>
+      </div>
+      <div id="perfList"></div>
+    </div>
+  </div>
+
+  <div class="sec-row">
+    <div class="card" id="secDonut" style="display:none">
+      <div class="ct"><i class="ti ti-chart-donut"></i>Contribution to today's calls</div>
+      <div class="donut-wrap">
+        <canvas id="donutC" width="190" height="190" role="img" aria-label="Call contribution donut"></canvas>
+      </div>
+      <div id="donutLeg" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;font-size:9px;margin-top:4px"></div>
+    </div>
+    <div class="card" id="secContrib" style="display:none">
+      <div class="ct"><i class="ti ti-trophy"></i>Top contributors — calls handled</div>
+      <div id="contribList"></div>
+    </div>
+  </div>
+
+  <div class="card-full" id="secLeaderboard" style="display:none">
+    <div class="ct">
+      <i class="ti ti-list-details"></i>Agent leaderboard
+      <span id="tblCount" style="margin-left:auto;font-size:10px;font-weight:400;color:#9490B0;text-transform:none;letter-spacing:0"></span>
+    </div>
+    <div class="tab-bar">
+      <button class="tab active" onclick="switchTab('india',this)" id="tabIndia"></button>
+      <button class="tab" onclick="switchTab('qatar',this)" id="tabQatar"></button>
+      <button class="tab" onclick="switchTab('all',this)">
+        <i class="ti ti-users" style="font-size:10px;margin-right:3px"></i>All teams
+      </button>
+    </div>
+    <input class="search-bar" type="search" placeholder="Search agent name or CISCO ID…" id="searchBox" oninput="renderTable()"/>
+    <div class="twrap">
+      <table>
+        <thead id="tblHead"></thead>
+        <tbody id="tblBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer" id="footerText"></div>
+</div>
+
+<script>
+// ─── Shorthand to config ───
+const C = DASHBOARD_CONFIG;
+const T = C.targets;
+const TH = C.theme;
+
+const AVC = ['#FF7722','#4E29A8','#D84E00','#7C52CC','#F05A00','#2D1666','#FF9A55','#5E35B1','#E65100','#9490B0','#3D1F8A','#8B5CF6','#BF360C','#6A4BC4'];
+
+let INDIA = [...C.fallbackIndia];
+let QATAR = [...C.fallbackQatar];
+let activeTab = 'india', sortCol = 'answered', sortDir = -1, donutInst = null;
+
+// ─── Apply theme from config ───
+function applyTheme(){
+  const s = document.getElementById('themeStyle');
+  s.textContent = `
+    :root {
+      --base:       ${TH.purpleBase};
+      --dark:       ${TH.purpleDark};
+      --mid:        ${TH.purpleMid};
+      --accent:     ${TH.purpleMid};
+      --purpleAccent:${TH.purpleAccent};
+      --light:      ${TH.purpleLight};
+      --border:     ${TH.purpleLight};
+      --tint:       ${TH.purpleTint};
+      --pale:       ${TH.purplePale};
+      --orange:     ${TH.orange};
+      --orangeDark: ${TH.orangeDark};
+      --orangeLight:${TH.orangeLight};
+      --paleorange: ${TH.orangePale};
+    }
+  `;
+}
+
+// ─── Apply branding from config ───
+function applyBranding(){
+  document.title = C.branding.title;
+  document.getElementById('hTitle').textContent = C.branding.title;
+  document.getElementById('headerMeta').innerHTML =
+    `${C.branding.subtitle} &nbsp;·&nbsp; ${C.branding.periodLabel} &nbsp;·&nbsp; ${INDIA.length} agents`;
+  document.getElementById('hBadge').innerHTML =
+    `<i class="ti ti-flag" style="font-size:11px"></i>${C.branding.teamLabel}`;
+  document.getElementById('footerText').innerHTML =
+    `${C.branding.footerText} &nbsp;·&nbsp; <strong>${C.teams.teamA.name} Team</strong>`;
+  document.getElementById('tgtInput').value = T.defaultDailyTarget;
+
+  // Tab labels
+  document.getElementById('tabIndia').innerHTML =
+    `<i class="ti ti-flag" style="font-size:10px;margin-right:3px"></i>${C.teams.teamA.name} agents`;
+  document.getElementById('tabQatar').innerHTML =
+    `<i class="ti ti-globe" style="font-size:10px;margin-right:3px"></i>${C.teams.teamB.name} agents`;
+
+  // Colour key swatches
+  document.getElementById('swHigh').style.background = T.barColourHigh;
+  document.getElementById('swMid').style.background  = T.barColourMid;
+  document.getElementById('swLow').style.background  = T.barColourLow;
+
+  // Sections visibility
+  const S = C.sections;
+  document.getElementById('starCard').style.display      = S.showStarCard       ? '' : 'none';
+  document.getElementById('secTVA').style.display        = S.showTargetVsAchiev ? '' : 'none';
+  document.getElementById('secPerf').style.display       = S.showPerfBars       ? '' : 'none';
+  document.getElementById('secDonut').style.display      = S.showDonut          ? '' : 'none';
+  document.getElementById('secContrib').style.display    = S.showContribList    ? '' : 'none';
+  document.getElementById('secLeaderboard').style.display= S.showLeaderboard    ? '' : 'none';
+
+  // Table header from column config
+  const cols = C.columns;
+  document.getElementById('tblHead').innerHTML = `<tr>
+    <th style="width:26px" onclick="srt('no')"># ↕</th>
+    <th style="width:150px" onclick="srt('name')">Agent ↕</th>
+    ${cols.showCalls   ?`<th style="width:105px" onclick="srt('answered')">Calls ↕</th>`:''}
+    ${cols.showVOC     ?`<th style="width:90px"  onclick="srt('voc')">VOC ↕</th>`:''}
+    ${cols.showHold    ?`<th style="width:90px"  onclick="srt('holdPct')">Hold % ↕</th>`:''}
+    ${cols.showAHT     ?`<th style="width:90px"  onclick="srt('aht')">AHT ↕</th>`:''}
+    ${cols.showSurveys ?`<th style="width:46px"  onclick="srt('surveys')">Surv.</th>`:''}
+    ${cols.showShare   ?`<th style="width:50px"  onclick="srt('contrib')">Share ↕</th>`:''}
+    ${cols.showTarget  ?`<th style="width:54px"  onclick="srt('tgtPct')">Tgt % ↕</th>`:''}
+    ${cols.showStatus  ?`<th style="width:52px">Status</th>`:''}
+  </tr>`;
+
+  // Pre-fill Sheet ID from config if provided
+  if(C.googleSheets.sheetId){
+    document.getElementById('sheetIdInput').value = C.googleSheets.sheetId;
+    document.getElementById('gidInput').value = C.googleSheets.gid;
+  }
+}
+
+// ─── Colour helpers (use config thresholds) ───
+function pCol(r){ return r >= .9 ? T.barColourHigh : r >= .7 ? T.barColourMid : T.barColourLow; }
+function vCol(v){ return v >= T.vocHigh ? T.barColourHigh : v >= T.vocLow ? T.barColourMid : T.barColourLow; }
+function hCol(p){ return p <= T.holdLow ? T.barColourHigh : p <= T.holdHigh ? T.barColourMid : T.barColourLow; }
+function aCol(v,mx){ const r=v/mx; return r<=.5 ? T.barColourHigh : r<=.75 ? T.barColourMid : T.barColourLow; }
+function ini(n){ return n.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase(); }
+
+function animateBars(){
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('[data-w]').forEach(el=>{ el.style.width = el.getAttribute('data-w')+'%'; });
+  });
+}
+
+// ─── Google Sheets sync ───
+function setSyncState(state,msg){
+  document.getElementById('syncDot').className = 'sync-dot'+(state==='loading'?' loading':state==='error'?' error':'');
+  document.getElementById('syncMsg').textContent = msg;
+}
+function setProgress(p){ document.getElementById('ovProg').style.width = p+'%'; }
+function setOvMsg(m){ document.getElementById('ovMsg').textContent = m; }
+function hideOverlay(){ document.getElementById('overlay').classList.add('hidden'); }
+
+function parseGvizRow(row){
+  const cells = row.c||[];
+  const g = i => { const c=cells[i]; return (c&&c.v!==null&&c.v!==undefined)?c.v:null; };
+  return {
+    id:       g(0),
+    name:     String(g(1)||''),
+    team:     String(g(2)||''),
+    surveys:  Number(g(3))||0,
+    voc:      g(4)!==null ? Number(g(4)) : null,
+    answered: Number(g(5))||0,
+    holdPct:  g(7)!==null ? Number(g(7)) : 0,
+    aht:      g(13)!==null ? Number(g(13)) : null,
+  };
+}
+
+async function fetchSheetData(){
+  const sheetId = document.getElementById('sheetIdInput').value.trim();
+  if(!sheetId){
+    setSyncState('error','No Sheet ID — using built-in data');
+    INDIA=[...C.fallbackIndia]; QATAR=[...C.fallbackQatar];
+    renderAll(); hideOverlay(); return;
+  }
+  setSyncState('loading','Fetching from Google Sheets…');
+  setOvMsg('Connecting to Google Sheets…'); setProgress(20);
+  const gid = document.getElementById('gidInput').value.trim()||'0';
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
+  try{
+    const res  = await fetch(url);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const text = await res.text();
+    setProgress(60); setOvMsg('Parsing data…');
+    const json  = JSON.parse(text.replace(/^[^\{]+/,'').replace(/\);\s*$/,''));
+    const rows  = ((json.table||{}).rows)||[];
+    const all   = rows.slice(1).map(parseGvizRow).filter(a=>a.name&&a.name.length>2);
+    const tA    = C.teams.teamA.sheetLabel.toLowerCase();
+    const tB    = C.teams.teamB.sheetLabel.toLowerCase();
+    const india = all.filter(a=>a.team.toLowerCase().includes(tA));
+    const qatar = all.filter(a=>a.team.toLowerCase().includes(tB));
+    if(india.length) INDIA=india; else INDIA=[...C.fallbackIndia];
+    if(qatar.length) QATAR=qatar; else QATAR=[...C.fallbackQatar];
+    const now = new Date().toLocaleTimeString();
+    setSyncState('ok',`Synced ${now} · ${INDIA.length} ${C.teams.teamA.name}, ${QATAR.length} ${C.teams.teamB.name}`);
+    document.getElementById('headerMeta').innerHTML =
+      `${C.branding.subtitle} &nbsp;·&nbsp; ${C.branding.periodLabel} &nbsp;·&nbsp; ${INDIA.length} agents · Auto-sync ON`;
+    setProgress(100); setOvMsg('Loaded!');
+  }catch(err){
+    console.warn('Sheet error:',err.message);
+    setSyncState('error','Sheet unreachable — using built-in data');
+    INDIA=[...C.fallbackIndia]; QATAR=[...C.fallbackQatar];
+    setProgress(100); setOvMsg('Using built-in data');
+  }
+  setTimeout(hideOverlay,500);
+  renderAll();
+}
+
+// Auto-refresh
+setInterval(()=>{ if(document.getElementById('sheetIdInput').value.trim()) fetchSheetData(); },
+  C.googleSheets.autoRefreshMinutes * 60 * 1000);
+
+// ─── KPIs ───
+function renderKPIs(){
+  if(!C.sections.showKPIStrip){ document.getElementById('kpiGrid').style.display='none'; return; }
+  const act = INDIA.filter(a=>a.answered>0);
+  const tot = INDIA.reduce((s,a)=>s+a.answered,0);
+  const vV  = INDIA.filter(a=>a.voc!==null&&a.surveys>0);
+  const aV  = act.filter(a=>a.aht);
+  const avgV= vV.length ? vV.reduce((s,a)=>s+a.voc,0)/vV.length : 0;
+  const avgA= aV.length ? aV.reduce((s,a)=>s+a.aht,0)/aV.length : 0;
+  const surv= INDIA.reduce((s,a)=>s+a.surveys,0);
+  document.getElementById('kpiGrid').innerHTML=`
+    <div class="kpi"><div class="kpi-lbl">Total calls</div><div class="kpi-val">${tot.toLocaleString()}</div><div class="kpi-sub">India inbound</div><i class="ti ti-phone-call kpi-ico"></i></div>
+    <div class="kpi"><div class="kpi-lbl">Avg VOC</div><div class="kpi-val">${(avgV*100).toFixed(1)}%</div><div class="kpi-sub">satisfaction score</div><i class="ti ti-star kpi-ico"></i></div>
+    <div class="kpi"><div class="kpi-lbl">Avg AHT</div><div class="kpi-val">${Math.round(avgA)}s</div><div class="kpi-sub">avg handle time</div><i class="ti ti-clock kpi-ico"></i></div>
+    <div class="kpi"><div class="kpi-lbl">Surveys</div><div class="kpi-val">${surv}</div><div class="kpi-sub">received</div><i class="ti ti-clipboard-list kpi-ico"></i></div>
+    <div class="kpi"><div class="kpi-lbl">Active agents</div><div class="kpi-val">${act.length}<span style="font-size:13px;font-weight:400;color:#9490B0">/${INDIA.length}</span></div><div class="kpi-sub">handling calls</div><i class="ti ti-users kpi-ico"></i></div>
+  `;
+}
+
+// ─── Star card ───
+function renderStar(){
+  if(!C.sections.showStarCard) return;
+  const W = C.starWeights;
+  const sc = INDIA.filter(a=>a.answered>0).map(a=>({...a,
+    score: (a.voc||0)*W.voc + Math.min(a.answered/160,1)*W.calls +
+           (1-Math.min(a.holdPct,1))*W.hold + Math.min(a.surveys/10,1)*W.surveys
+  })).sort((a,b)=>b.score-a.score);
+  if(!sc.length) return;
+  const s = sc[0];
+  document.getElementById('starCard').style.display='';
+  document.getElementById('starCard').innerHTML=`
+    <div class="star-avatar">${ini(s.name)}</div>
+    <div class="star-info">
+      <div class="star-name"><i class="ti ti-star-filled"></i>${s.name}</div>
+      <div class="star-role">Star Contributor · ${C.branding.periodLabel} · Score: ${Math.round(s.score)}/100</div>
+      <div class="star-stats">
+        <div><div class="ss-val">${s.answered}</div><div class="ss-lbl">Calls</div></div>
+        <div><div class="ss-val">${s.voc?(s.voc*100).toFixed(0)+'%':'—'}</div><div class="ss-lbl">VOC</div></div>
+        <div><div class="ss-val">${s.surveys}</div><div class="ss-lbl">Surveys</div></div>
+        <div><div class="ss-val">${Math.round(s.aht||0)}s</div><div class="ss-lbl">AHT</div></div>
+        <div><div class="ss-val">${(s.holdPct*100).toFixed(0)}%</div><div class="ss-lbl">Hold</div></div>
+      </div>
+    </div>
+    <span class="star-badge"><i class="ti ti-award" style="font-size:11px;margin-right:3px"></i>Top performer</span>
+  `;
+}
+
+// ─── TVA ───
+function renderTVA(){
+  if(!C.sections.showTargetVsAchiev) return;
+  const tgt = parseInt(document.getElementById('tgtInput').value)||T.defaultDailyTarget;
+  const act = INDIA.filter(a=>a.answered>0).sort((a,b)=>b.answered-a.answered);
+  document.getElementById('tvaList').innerHTML = act.map(a=>{
+    const ratio = a.answered/tgt;
+    const w     = Math.min(ratio*100,100).toFixed(1);
+    const col   = pCol(ratio);
+    const lbl   = ratio>=1 ? 'Target met' : Math.round(ratio*100)+'%';
+    return `<div class="tva-item">
+      <div class="tva-name-row">
+        <span class="tva-name">${a.name.split(' ')[0]}</span>
+        <span class="tva-pct-lbl" style="color:${col}">${a.answered} / ${tgt}</span>
+      </div>
+      <div class="tva-track">
+        <div class="tva-fill" style="background:${col}" data-w="${w}"><span>${lbl}</span></div>
+      </div>
+      <div class="tva-sub"><span>${a.answered} calls answered</span><span>Target: ${tgt}</span></div>
+    </div>`;
+  }).join('');
+  animateBars();
+}
+
+// ─── Perf bars ───
+function renderPerf(){
+  if(!C.sections.showPerfBars) return;
+  const act = INDIA.filter(a=>a.answered>0).sort((a,b)=>b.answered-a.answered);
+  const mxC = act[0]?.answered||1;
+  const mxA = Math.max(...act.filter(a=>a.aht).map(a=>a.aht),1);
+  document.getElementById('perfList').innerHTML = act.map((a,i)=>{
+    const cW = Math.round(a.answered/mxC*100);
+    const vW = a.voc!=null ? Math.round(a.voc*100) : 0;
+    const hW = Math.round(Math.max(0,(1-a.holdPct*2))*100);
+    const aW = a.aht ? Math.round(Math.max(0,(1-a.aht/mxA))*100) : 0;
+    const av = AVC[i%AVC.length];
+    return `<div class="perf-item">
+      <div class="perf-head">
+        <span class="perf-rank" style="color:${i<3?av:'#9490B0'}">${i+1}</span>
+        <div class="perf-avatar" style="background:${av}">${ini(a.name)}</div>
+        <span class="perf-name">${a.name.split(' ').slice(0,2).join(' ')}</span>
+      </div>
+      <div class="perf-bars">
+        <div class="bar-row"><span class="bar-lbl">Calls</span><div class="bar-outer"><div class="bar-inner" style="background:${pCol(a.answered/mxC)}" data-w="${cW}"></div></div><span class="bar-tip" style="color:${pCol(a.answered/mxC)}">${a.answered}</span></div>
+        <div class="bar-row"><span class="bar-lbl">VOC</span><div class="bar-outer"><div class="bar-inner" style="background:${vCol(a.voc||0)}" data-w="${vW}"></div></div><span class="bar-tip" style="color:${vCol(a.voc||0)}">${a.voc?(a.voc*100).toFixed(0)+'%':'—'}</span></div>
+        <div class="bar-row"><span class="bar-lbl">Hold</span><div class="bar-outer"><div class="bar-inner" style="background:${hCol(a.holdPct)}" data-w="${hW}"></div></div><span class="bar-tip" style="color:${hCol(a.holdPct)}">${(a.holdPct*100).toFixed(0)}%</span></div>
+        ${a.aht?`<div class="bar-row"><span class="bar-lbl">AHT</span><div class="bar-outer"><div class="bar-inner" style="background:${aCol(a.aht,mxA)}" data-w="${aW}"></div></div><span class="bar-tip" style="color:${aCol(a.aht,mxA)}">${Math.round(a.aht)}s</span></div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  animateBars();
+}
+
+// ─── Donut ───
+function renderDonut(){
+  if(!C.sections.showDonut) return;
+  const act = INDIA.filter(a=>a.answered>0).sort((a,b)=>b.answered-a.answered);
+  const tot = act.reduce((s,a)=>s+a.answered,0)||1;
+  const ctx = document.getElementById('donutC').getContext('2d');
+  if(donutInst) donutInst.destroy();
+  donutInst = new Chart(ctx,{
+    type:'doughnut',
+    data:{ labels:act.map(a=>a.name.split(' ')[0]), datasets:[{ data:act.map(a=>a.answered), backgroundColor:AVC.slice(0,act.length), borderWidth:2, borderColor:'#fff', hoverOffset:6 }] },
+    options:{ responsive:false, plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>`${c.label}: ${c.parsed} (${(c.parsed/tot*100).toFixed(1)}%)`}} }, cutout:'62%' }
+  });
+  document.getElementById('donutLeg').innerHTML = act.slice(0,8).map((a,i)=>
+    `<span style="display:flex;align-items:center;gap:3px"><span style="width:9px;height:9px;border-radius:2px;background:${AVC[i]};flex-shrink:0"></span><span>${a.name.split(' ')[0]}</span></span>`
+  ).join('');
+}
+
+// ─── Contrib list ───
+function renderContrib(){
+  if(!C.sections.showContribList) return;
+  const act = INDIA.filter(a=>a.answered>0).sort((a,b)=>b.answered-a.answered);
+  const tot = act.reduce((s,a)=>s+a.answered,0)||1;
+  document.getElementById('contribList').innerHTML = act.slice(0,8).map((a,i)=>{
+    const pct = (a.answered/tot*100).toFixed(1);
+    const bW  = Math.round(a.answered/act[0].answered*100);
+    return `<div class="contrib-item">
+      <div class="contrib-rank" style="background:${AVC[i]}">${i+1}</div>
+      <span style="font-size:11px;font-weight:600;color:var(--base);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.name.split(' ').slice(0,2).join(' ')}</span>
+      <div class="contrib-bar-outer"><div class="contrib-bar-inner" style="background:${AVC[i]}" data-w="${bW}"></div></div>
+      <span class="contrib-pct">${pct}%</span>
+    </div>`;
+  }).join('');
+  setTimeout(animateBars,80);
+}
+
+// ─── Table ───
+function switchTab(k,el){
+  activeTab=k;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderTable();
+}
+function getStatus(a){
+  if(a.answered===0) return{l:'Inactive',c:'pb'};
+  if(a.voc!=null&&a.voc>=T.vocHigh&&a.holdPct<T.holdLow) return{l:'Top',c:'pg'};
+  if(a.voc==null||a.voc<T.vocLow||a.holdPct>T.holdHigh) return{l:'Review',c:'pr'};
+  return{l:'Good',c:'pa'};
+}
+function srt(col){ if(sortCol===col) sortDir*=-1; else{sortCol=col;sortDir=-1;} renderTable(); }
+function renderTable(){
+  if(!C.sections.showLeaderboard) return;
+  const q   = (document.getElementById('searchBox').value||'').toLowerCase();
+  const tgt = parseInt(document.getElementById('tgtInput').value)||T.defaultDailyTarget;
+  const cols = C.columns;
+  let pool  = activeTab==='india' ? INDIA : activeTab==='qatar' ? QATAR : [...INDIA,...QATAR];
+  const mxC = Math.max(...pool.map(a=>a.answered),1);
+  const mxA = Math.max(...pool.filter(a=>a.aht).map(a=>a.aht),1);
+  const totC= pool.reduce((s,a)=>s+a.answered,0)||1;
+  let data  = pool.map(a=>({...a, contrib:a.answered/totC*100, tgtPct:a.answered/tgt*100}));
+  if(q) data = data.filter(a=>a.name.toLowerCase().includes(q)||String(a.id||'').includes(q));
+  data = [...data].sort((a,b)=>{
+    if(sortCol==='name') return sortDir*(a.name<b.name?-1:1);
+    const mp = {answered:'answered',voc:'voc',aht:'aht',holdPct:'holdPct',surveys:'surveys',contrib:'contrib',tgtPct:'tgtPct',no:'id'};
+    return sortDir*((a[mp[sortCol]]??-999)-(b[mp[sortCol]]??-999));
+  });
+  document.getElementById('tblCount').textContent = data.length+' agents';
+  document.getElementById('tblBody').innerHTML = data.map((a,i)=>{
+    const st = getStatus(a);
+    const cW = Math.round(a.answered/mxC*100);
+    const vW = a.voc!=null ? Math.round(a.voc*100) : 0;
+    const hW = Math.round(a.holdPct*100);
+    const aW = a.aht ? Math.round(a.aht/mxA*100) : 0;
+    const tC = a.answered>=tgt ? T.barColourHigh : a.answered>=tgt*.8 ? T.barColourMid : T.barColourLow;
+    return `<tr>
+      <td style="color:#9490B0;font-size:10px">${i+1}</td>
+      <td style="font-weight:600;color:var(--base);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.name.length>22?a.name.slice(0,20)+'…':a.name}</td>
+      ${cols.showCalls?`<td><div class="mini-bar-outer"><div class="mini-bar-inner" style="background:${pCol(a.answered/mxC)}" data-w="${cW}"></div></div><span class="vl" style="color:${pCol(a.answered/mxC)}">${a.answered}</span></td>`:''}
+      ${cols.showVOC?`<td>${a.voc!=null?`<div class="mini-bar-outer"><div class="mini-bar-inner" style="background:${vCol(a.voc)}" data-w="${vW}"></div></div><span class="vl" style="color:${vCol(a.voc)}">${(a.voc*100).toFixed(0)}%</span>`:'<span style="color:#9490B0;font-size:9px">—</span>'}</td>`:''}
+      ${cols.showHold?`<td><div class="mini-bar-outer"><div class="mini-bar-inner" style="background:${hCol(a.holdPct)}" data-w="${hW}"></div></div><span class="vl" style="color:${hCol(a.holdPct)}">${(a.holdPct*100).toFixed(0)}%</span></td>`:''}
+      ${cols.showAHT?`<td>${a.aht?`<div class="mini-bar-outer"><div class="mini-bar-inner" style="background:${aCol(a.aht,mxA)}" data-w="${aW}"></div></div><span class="vl" style="color:${aCol(a.aht,mxA)}">${Math.round(a.aht)}s</span>`:'<span style="color:#9490B0;font-size:9px">—</span>'}</td>`:''}
+      ${cols.showSurveys?`<td style="font-size:9px;color:#5A566E">${a.surveys}</td>`:''}
+      ${cols.showShare?`<td style="font-weight:700;color:var(--accent);font-size:9px">${a.contrib.toFixed(1)}%</td>`:''}
+      ${cols.showTarget?`<td style="font-weight:700;font-size:9px;color:${tC}">${a.tgtPct.toFixed(0)}%</td>`:''}
+      ${cols.showStatus?`<td><span class="pill p${st.c.slice(1)}">${st.l}</span></td>`:''}
+    </tr>`;
+  }).join('');
+  setTimeout(animateBars,50);
+}
+
+// ─── Render all ───
+function renderAll(){ renderKPIs(); renderStar(); renderTVA(); renderPerf(); renderDonut(); renderContrib(); renderTable(); }
+
+// ─── Boot ───
+window.addEventListener('DOMContentLoaded',()=>{
+  applyTheme();
+  applyBranding();
+  setOvMsg('Loading dashboard…'); setProgress(30);
+  setTimeout(()=>{ setProgress(70); setOvMsg('Building visuals…'); fetchSheetData(); }, 350);
+});
+</script>
+</body>
+</html>
