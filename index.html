@@ -675,7 +675,44 @@ function renderTable(){
   }).join('');
   setTimeout(animateBars,50);
 }
+<script>
+(function(){
+  let direction = 1;
+  let pos = 0;
+  const speed = 0.6; // px per frame — increase to scroll faster
 
+  function autoScroll(){
+    const maxScroll = document.body.scrollHeight - window.innerHeight;
+    pos += speed * direction;
+
+    if(pos >= maxScroll){ pos = maxScroll; direction = -1; } // hit bottom → reverse
+    if(pos <= 0)         { pos = 0;        direction =  1; } // hit top → reverse
+
+    window.scrollTo({ top: pos, behavior: 'instant' });
+    requestAnimationFrame(autoScroll);
+  }
+
+  // Pause scroll when user interacts, resume after 4 seconds
+  let paused = false, resumeTimer;
+  function pauseScroll(){
+    paused = true;
+    clearTimeout(resumeTimer);
+    resumeTimer = setTimeout(()=>{ paused = false; }, 4000);
+  }
+  ['wheel','touchstart','mousedown','keydown'].forEach(e =>
+    window.addEventListener(e, pauseScroll, { passive: true })
+  );
+
+  // Wrap to check pause
+  function loop(){
+    if(!paused) autoScroll();
+    else requestAnimationFrame(loop);
+  }
+
+  // Start after dashboard finishes loading
+  setTimeout(()=> requestAnimationFrame(autoScroll), 2000);
+})();
+</script>
 // ─── Render all ───
 function renderAll(){ renderKPIs(); renderStar(); renderTVA(); renderPerf(); renderDonut(); renderContrib(); renderTable(); }
 
