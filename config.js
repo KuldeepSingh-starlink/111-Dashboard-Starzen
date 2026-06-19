@@ -15,7 +15,7 @@ const DASHBOARD_CONFIG = {
     title:        "CX Inbound — India Team Dashboard",
     subtitle:     "Overall Agent Wise Tracker",
     periodLabel:  "Period: 46174 – 46179",
-    teamLabel:    "India Only",
+    teamLabel:    "India",
     footerText:   "CX Inbound Dashboard · India Team · Auto-syncs from Google Sheets",
   },
 
