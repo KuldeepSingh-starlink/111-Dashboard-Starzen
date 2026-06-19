@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>CX India Dashboard</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <!-- ★ All customisation lives in config.js — edit that file only ★ -->
 <script src="config.js"></script>
@@ -12,26 +13,84 @@
 <style>
 /* ── RESET & BASE ── */
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--pale);color:var(--dark);font-size:13px}
-.layout{max-width:1400px;margin:0 auto;padding:18px 24px 36px}
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:var(--pale);color:var(--dark);font-size:13px;
+  min-height:100vh;
+}
+
+/* ── 16:9 LAYOUT CONTAINER ── */
+.layout{
+  width:100%;
+  max-width:1600px;
+  margin:0 auto;
+  padding:14px 20px 32px;
+}
 
 /* ── HEADER ── */
-.header{background:var(--base);border-radius:14px;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px}
-.header h1{font-size:16px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px}
-.header h1 i{color:var(--orange);font-size:20px}
-.header-meta{font-size:10px;color:var(--light);margin-top:2px}
-.header-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.hbadge{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;background:var(--orange);color:#fff;display:flex;align-items:center;gap:4px}
-.sync-btn{padding:4px 11px;border-radius:12px;font-size:10px;font-weight:600;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);cursor:pointer;display:flex;align-items:center;gap:4px;transition:background .15s}
-.sync-btn:hover{background:rgba(255,255,255,.25)}
-.sync-status{font-size:10px;color:var(--light);white-space:nowrap;display:flex;align-items:center;gap:4px}
+.header{
+  background:linear-gradient(135deg,var(--dark) 0%,var(--base) 60%,var(--mid) 100%);
+  border-radius:16px;padding:0;margin-bottom:14px;
+  display:flex;align-items:stretch;justify-content:space-between;
+  overflow:hidden;position:relative;min-height:72px;
+  box-shadow:0 4px 24px rgba(45,22,102,0.22);
+}
+
+/* Network lineart SVG background */
+.header-network{
+  position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:0.18;
+}
+.header-network svg{width:100%;height:100%;}
+
+.header-left{
+  display:flex;align-items:center;gap:16px;
+  padding:14px 22px;position:relative;z-index:2;
+}
+
+/* Starzen logo box */
+.starzen-logo{
+  flex-shrink:0;
+  width:48px;height:48px;
+  background:rgba(255,255,255,0.12);
+  border:1.5px solid rgba(255,255,255,0.25);
+  border-radius:12px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:1px;backdrop-filter:blur(8px);
+  box-shadow:0 2px 12px rgba(0,0,0,0.2),inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.starzen-star{font-size:18px;line-height:1;}
+.starzen-wordmark{font-size:7.5px;font-weight:800;color:rgba(255,255,255,0.9);letter-spacing:1.2px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;}
+
+.header-title-block{display:flex;flex-direction:column;gap:2px;}
+.header h1{
+  font-size:19px;font-weight:800;color:#fff;
+  font-family:'Space Grotesk',sans-serif;letter-spacing:-0.3px;
+  display:flex;align-items:center;gap:8px;
+  text-shadow:0 1px 6px rgba(0,0,0,0.25);
+}
+.header h1 .title-pill{
+  background:var(--orange);color:#fff;font-size:8px;font-weight:800;
+  padding:2px 7px;border-radius:20px;letter-spacing:0.8px;
+  text-transform:uppercase;vertical-align:middle;
+  box-shadow:0 2px 8px rgba(255,119,34,0.5);
+}
+.header-meta{font-size:10px;color:rgba(196,174,240,0.85);margin-top:1px;letter-spacing:0.2px;}
+
+.header-right{
+  display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+  padding:14px 20px;position:relative;z-index:2;
+}
+.hbadge{padding:5px 13px;border-radius:20px;font-size:11px;font-weight:700;background:var(--orange);color:#fff;display:flex;align-items:center;gap:4px;box-shadow:0 2px 8px rgba(255,119,34,0.4);}
+.sync-btn{padding:5px 12px;border-radius:12px;font-size:10px;font-weight:600;background:rgba(255,255,255,.13);color:#fff;border:1px solid rgba(255,255,255,.28);cursor:pointer;display:flex;align-items:center;gap:4px;transition:background .15s;backdrop-filter:blur(4px);}
+.sync-btn:hover{background:rgba(255,255,255,.22)}
+.sync-status{font-size:10px;color:rgba(196,174,240,0.9);white-space:nowrap;display:flex;align-items:center;gap:4px;}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:#27AE60;flex-shrink:0}
 .sync-dot.loading{background:#FF7722;animation:blink 1s infinite}
 .sync-dot.error{background:#E24B4A}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
 /* ── CONFIG BAR ── */
-.config-bar{background:var(--mid);border-radius:10px;padding:8px 16px;display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.config-bar{background:var(--mid);border-radius:10px;padding:8px 16px;display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
 .config-bar label{font-size:10px;color:var(--light);white-space:nowrap;font-weight:600}
 .config-bar input[type=text]{flex:1;min-width:200px;padding:5px 9px;border-radius:7px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-size:10px}
 .config-bar input[type=text]::placeholder{color:rgba(255,255,255,.35)}
@@ -41,66 +100,171 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--pal
 .cfg-btn:hover{background:var(--orangeDark)}
 .config-note{font-size:9px;color:rgba(255,255,255,.4)}
 
+/* ── SECTION TITLES ── */
+.section-title{
+  font-size:18px;font-weight:800;
+  font-family:'Space Grotesk',sans-serif;
+  color:var(--base);letter-spacing:-0.3px;
+  padding:0 0 6px 0;margin-bottom:14px;
+  border-bottom:3px solid var(--orange);
+  display:inline-block;
+  text-shadow:none;
+}
+.section-title-highlight{
+  background:linear-gradient(90deg,var(--base),var(--mid));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
 /* ── KPI STRIP ── */
-.kpi-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:12px}
-.kpi{background:#fff;border-radius:12px;border:1px solid var(--border);padding:12px 15px;position:relative;overflow:hidden;transition:transform .15s}
-.kpi:hover{transform:translateY(-2px)}
-.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--orange)}
-.kpi-lbl{font-size:9px;color:#5A566E;text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:3px}
-.kpi-val{font-size:22px;font-weight:800;color:var(--base);line-height:1}
-.kpi-sub{font-size:9px;color:#9490B0;margin-top:2px}
-.kpi-ico{position:absolute;right:12px;top:14px;font-size:20px;color:var(--border)}
+.kpi-section-header{
+  display:flex;align-items:center;gap:12px;margin-bottom:12px;
+}
+.kpi-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.kpi{
+  background:#fff;border-radius:14px;
+  border:1px solid var(--border);padding:14px 16px;
+  position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s;
+}
+.kpi:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(45,22,102,0.12)}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--orange),var(--orangeLight))}
+.kpi-lbl{font-size:9px;color:#5A566E;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:4px}
+.kpi-val{font-size:26px;font-weight:900;color:var(--base);line-height:1;font-family:'Space Grotesk',sans-serif}
+.kpi-sub{font-size:9px;color:#9490B0;margin-top:3px}
+.kpi-ico{position:absolute;right:12px;top:14px;font-size:22px;color:var(--border)}
 
-/* ── STAR CARD ── */
-.star-card{background:var(--base);border-radius:12px;padding:14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-.star-avatar{width:54px;height:54px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:#fff;flex-shrink:0;border:2px solid var(--orangeLight)}
-.star-info{flex:1;min-width:160px}
-.star-name{font-size:14px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* ── STAR CARD (glass 3D) ── */
+.star-card{
+  border-radius:16px;padding:18px 22px;margin-bottom:14px;
+  display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+  position:relative;overflow:hidden;
+  background:linear-gradient(135deg,var(--dark) 0%,var(--base) 50%,var(--mid) 100%);
+  box-shadow:0 8px 32px rgba(45,22,102,0.30),inset 0 1px 0 rgba(255,255,255,0.12);
+}
+/* Glass shimmer top layer */
+.star-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(160deg,rgba(255,255,255,0.10) 0%,rgba(255,255,255,0.03) 40%,rgba(0,0,0,0) 70%);
+  pointer-events:none;border-radius:16px;
+}
+/* Diagonal glint */
+.star-card::after{
+  content:'';position:absolute;top:-60%;left:-20%;
+  width:60%;height:200%;
+  background:linear-gradient(105deg,rgba(255,255,255,0.08) 0%,rgba(255,255,255,0.02) 60%,transparent 100%);
+  pointer-events:none;transform:rotate(-15deg);
+}
+/* Animated GIF placeholder — will be overridden by renderStar() */
+.star-gif{
+  width:64px;height:64px;border-radius:50%;overflow:hidden;
+  flex-shrink:0;border:3px solid rgba(255,119,34,0.6);
+  box-shadow:0 0 20px rgba(255,119,34,0.35);
+  position:relative;z-index:2;
+  background:var(--orangeDark);display:flex;align-items:center;justify-content:center;
+}
+.star-gif img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.star-avatar{
+  width:64px;height:64px;border-radius:50%;
+  background:linear-gradient(135deg,var(--orange),var(--orangeDark));
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:900;color:#fff;flex-shrink:0;
+  border:3px solid rgba(255,119,34,0.5);
+  box-shadow:0 4px 16px rgba(255,119,34,0.4);
+  position:relative;z-index:2;
+  font-family:'Space Grotesk',sans-serif;
+}
+.star-info{flex:1;min-width:160px;position:relative;z-index:2;}
+.star-name{
+  font-size:18px;font-weight:800;color:#fff;
+  font-family:'Space Grotesk',sans-serif;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
 .star-name i{color:var(--orange);margin-right:5px}
-.star-role{font-size:9px;color:var(--light);margin-top:2px}
-.star-stats{display:flex;gap:14px;margin-top:8px;flex-wrap:wrap}
-.ss-val{font-size:14px;font-weight:700;color:var(--orange)}
-.ss-lbl{font-size:8px;color:var(--light);text-transform:uppercase;letter-spacing:.4px}
-.star-badge{background:var(--orange);color:#fff;font-size:10px;font-weight:700;padding:4px 12px;border-radius:12px;align-self:flex-start;white-space:nowrap}
+.star-role{font-size:10px;color:rgba(196,174,240,0.8);margin-top:2px;letter-spacing:0.3px}
+.star-stats{display:flex;gap:18px;margin-top:10px;flex-wrap:wrap}
+.ss-val{font-size:18px;font-weight:800;color:var(--orange);font-family:'Space Grotesk',sans-serif}
+.ss-lbl{font-size:8px;color:rgba(196,174,240,0.7);text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
+.star-badge{
+  background:linear-gradient(135deg,var(--orange),var(--orangeDark));
+  color:#fff;font-size:11px;font-weight:700;
+  padding:6px 16px;border-radius:20px;align-self:flex-start;white-space:nowrap;
+  box-shadow:0 4px 12px rgba(255,119,34,0.5);position:relative;z-index:2;
+}
 
-/* ── CARDS ── */
-.sec-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.card{background:#fff;border-radius:12px;border:1px solid var(--border);padding:14px}
-.card-full{background:#fff;border-radius:12px;border:1px solid var(--border);padding:14px;margin-bottom:12px}
-.ct{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:5px}
-.ct i{color:var(--orange);font-size:13px}
+/* Star card trophy animation */
+.star-trophy{
+  font-size:48px;position:relative;z-index:2;flex-shrink:0;
+  animation:trophy-pulse 2.5s ease-in-out infinite;
+}
+@keyframes trophy-pulse{
+  0%,100%{transform:scale(1) rotate(-3deg);filter:drop-shadow(0 0 8px rgba(255,119,34,0.4))}
+  50%{transform:scale(1.08) rotate(3deg);filter:drop-shadow(0 0 18px rgba(255,119,34,0.8))}
+}
+
+/* ── GLASS 3D CARDS ── */
+.card{
+  background:#fff;border-radius:14px;border:1px solid var(--border);padding:16px;
+  box-shadow:0 2px 12px rgba(45,22,102,0.06);
+}
+.card-full{background:#fff;border-radius:14px;border:1px solid var(--border);padding:16px;margin-bottom:14px;}
+
+/* Glass 3D effect for dark cards */
+.card-glass{
+  background:linear-gradient(135deg,rgba(45,22,102,0.92) 0%,rgba(78,41,168,0.88) 100%);
+  border-radius:14px;border:1px solid rgba(255,255,255,0.12);padding:16px;
+  box-shadow:0 8px 32px rgba(45,22,102,0.25),inset 0 1px 0 rgba(255,255,255,0.10);
+  position:relative;overflow:hidden;backdrop-filter:blur(12px);
+}
+.card-glass::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:45%;
+  background:linear-gradient(180deg,rgba(255,255,255,0.08) 0%,rgba(255,255,255,0) 100%);
+  pointer-events:none;border-radius:14px 14px 0 0;
+}
+.card-glass .ct{color:rgba(196,174,240,0.9);}
+.card-glass .ct i{color:var(--orange);}
+
+/* ── CARD TITLES ── */
+.ct{
+  font-size:13px;font-weight:700;color:var(--mid);
+  text-transform:uppercase;letter-spacing:.6px;
+  margin-bottom:12px;display:flex;align-items:center;gap:6px;
+  font-family:'Space Grotesk',sans-serif;
+}
+.ct i{color:var(--orange);font-size:15px}
+
+/* ── DECORATIVE DIAGRAM: Radar/hexagon fill for blank spaces ── */
+.blank-fill{
+  display:flex;align-items:center;justify-content:center;
+  padding:10px 0 4px;
+}
+.metrics-radar{
+  width:100%;max-width:260px;
+}
 
 /* ── TARGET INPUT ── */
-.tgt-input-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-.tgt-input-row label{font-size:10px;color:#5A566E}
-.tgt-input-row input{width:68px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:11px;color:var(--base)}
+.tgt-input-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.tgt-input-row label{font-size:11px;color:#5A566E;font-weight:500}
+.tgt-input-row input{width:70px;padding:5px 9px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;color:var(--base);font-weight:600}
 .tgt-input-row input:focus{outline:none;border-color:var(--accent)}
-.tgt-btn{padding:4px 12px;border:none;border-radius:6px;background:var(--accent);color:#fff;font-size:10px;font-weight:700;cursor:pointer;transition:background .15s}
+.tgt-btn{padding:5px 14px;border:none;border-radius:7px;background:var(--accent);color:#fff;font-size:10px;font-weight:700;cursor:pointer;transition:background .15s}
 .tgt-btn:hover{background:var(--base)}
 
-/* ══════════════════════════════════════
-   GLASS SHINE BARS
-   Dual-layer pseudo-element technique:
-   ::before = top-edge glint strip
-   ::after  = diagonal body sweep
-   ══════════════════════════════════════ */
-
-/* TVA bars */
-.tva-item{margin-bottom:10px}
-.tva-name-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
-.tva-name{font-size:11px;font-weight:600;color:var(--base)}
-.tva-pct-lbl{font-size:10px;font-weight:700}
-.tva-track{height:18px;background:var(--tint);border-radius:6px;overflow:hidden;position:relative}
+/* ── GLASS SHINE BARS ── */
+.tva-item{margin-bottom:12px}
+.tva-name-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.tva-name{font-size:12px;font-weight:700;color:var(--base)}
+.tva-pct-lbl{font-size:11px;font-weight:800;font-family:'Space Grotesk',sans-serif}
+.tva-track{height:20px;background:var(--tint);border-radius:7px;overflow:hidden;position:relative}
 .tva-fill{
-  height:100%;border-radius:6px;width:0;
+  height:100%;border-radius:7px;width:0;
   transition:width 1.3s cubic-bezier(.4,0,.2,1);
   position:relative;display:flex;align-items:center;justify-content:flex-end;
-  padding-right:7px;overflow:hidden;
+  padding-right:8px;overflow:hidden;
 }
 .tva-fill::before{
   content:'';position:absolute;top:0;left:0;right:0;height:38%;
   background:linear-gradient(180deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,0) 100%);
-  pointer-events:none;border-radius:6px 6px 0 0;
+  pointer-events:none;border-radius:7px 7px 0 0;
 }
 .tva-fill::after{
   content:'';position:absolute;inset:0;
@@ -108,19 +272,19 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--pal
   pointer-events:none;
 }
 .tva-fill span{font-size:9px;font-weight:700;color:#fff;white-space:nowrap;position:relative;z-index:2;text-shadow:0 1px 2px rgba(0,0,0,.25)}
-.tva-sub{display:flex;justify-content:space-between;font-size:9px;color:#9490B0;margin-top:2px}
+.tva-sub{display:flex;justify-content:space-between;font-size:9px;color:#9490B0;margin-top:3px}
 
 /* Performance bars */
-.perf-item{margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid var(--tint)}
+.perf-item{margin-bottom:11px;padding-bottom:10px;border-bottom:1px solid var(--tint)}
 .perf-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
-.perf-head{display:flex;align-items:center;gap:7px;margin-bottom:5px}
-.perf-avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;flex-shrink:0}
-.perf-name{font-size:11px;font-weight:600;color:var(--base);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.perf-rank{font-size:10px;font-weight:700;width:16px;text-align:center;flex-shrink:0}
-.perf-bars{display:flex;flex-direction:column;gap:4px;padding-left:31px}
+.perf-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.perf-avatar{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,0.15)}
+.perf-name{font-size:12px;font-weight:700;color:var(--base);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.perf-rank{font-size:11px;font-weight:800;width:18px;text-align:center;flex-shrink:0;font-family:'Space Grotesk',sans-serif}
+.perf-bars{display:flex;flex-direction:column;gap:5px;padding-left:34px}
 .bar-row{display:flex;align-items:center;gap:7px}
-.bar-lbl{font-size:9px;color:#9490B0;width:26px;text-align:right;flex-shrink:0}
-.bar-outer{flex:1;height:9px;background:var(--tint);border-radius:5px;overflow:hidden;position:relative}
+.bar-lbl{font-size:9px;color:#9490B0;width:28px;text-align:right;flex-shrink:0;font-weight:600}
+.bar-outer{flex:1;height:10px;background:var(--tint);border-radius:5px;overflow:hidden;position:relative}
 .bar-inner{
   height:100%;border-radius:5px;width:0;
   transition:width 1.3s cubic-bezier(.4,0,.2,1);
@@ -136,10 +300,10 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--pal
   background:linear-gradient(115deg,rgba(255,255,255,.28) 0%,rgba(255,255,255,.08) 45%,rgba(255,255,255,0) 65%,rgba(0,0,0,.05) 100%);
   pointer-events:none;
 }
-.bar-tip{font-size:9px;font-weight:700;width:32px;text-align:right;flex-shrink:0}
+.bar-tip{font-size:10px;font-weight:800;width:36px;text-align:right;flex-shrink:0;font-family:'Space Grotesk',sans-serif}
 
 /* Colour key swatches */
-.ckey{display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:9px;color:#5A566E;margin-bottom:10px}
+.ckey{display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:9px;color:#5A566E;margin-bottom:12px}
 .cki{display:flex;align-items:center;gap:4px}
 .cksw{width:28px;height:10px;border-radius:4px;position:relative;overflow:hidden;flex-shrink:0}
 .cksw::before{content:'';position:absolute;top:0;left:0;right:0;height:45%;background:linear-gradient(180deg,rgba(255,255,255,.60) 0%,rgba(255,255,255,0) 100%)}
@@ -160,80 +324,171 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--pal
   content:'';position:absolute;inset:0;
   background:linear-gradient(115deg,rgba(255,255,255,.25) 0%,rgba(255,255,255,0) 60%,rgba(0,0,0,.04) 100%);
 }
-.vl{font-size:9px;font-weight:700}
+.vl{font-size:10px;font-weight:700;font-family:'Space Grotesk',sans-serif}
 
 /* Contrib bars */
-.contrib-item{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.contrib-rank{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;flex-shrink:0}
-.contrib-bar-outer{flex:1;height:8px;background:var(--tint);border-radius:4px;overflow:hidden;position:relative}
+.contrib-item{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.contrib-rank{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,0.15);font-family:'Space Grotesk',sans-serif}
+.contrib-name{font-size:12px;font-weight:600;color:var(--base);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.contrib-bar-outer{flex:1;height:9px;background:var(--tint);border-radius:5px;overflow:hidden;position:relative}
 .contrib-bar-inner{
-  height:100%;border-radius:4px;width:0;
+  height:100%;border-radius:5px;width:0;
   transition:width 1.3s cubic-bezier(.4,0,.2,1);
   position:relative;overflow:hidden;
 }
 .contrib-bar-inner::before{content:'';position:absolute;top:0;left:0;right:0;height:45%;background:linear-gradient(180deg,rgba(255,255,255,.62) 0%,rgba(255,255,255,0) 100%)}
 .contrib-bar-inner::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.30) 0%,rgba(255,255,255,.08) 45%,rgba(255,255,255,0) 65%,rgba(0,0,0,.04) 100%)}
-.contrib-pct{font-size:10px;font-weight:700;color:var(--accent);min-width:34px;text-align:right}
+.contrib-pct{font-size:11px;font-weight:800;color:var(--accent);min-width:38px;text-align:right;font-family:'Space Grotesk',sans-serif}
 
-/* ── TABLE ── */
-.tab-bar{display:flex;border-bottom:2px solid var(--border);margin-bottom:10px}
-.tab{padding:7px 16px;font-size:11px;font-weight:600;color:#9490B0;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s}
-.tab.active{color:var(--accent);border-bottom-color:var(--orange)}
+/* ── LEADERBOARD TABLE (Page 5 — multi-colour + glass 3D) ── */
+.tab-bar{display:flex;border-bottom:2px solid var(--border);margin-bottom:12px;gap:4px}
+.tab{padding:8px 18px;font-size:12px;font-weight:600;color:#9490B0;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s;border-radius:6px 6px 0 0}
+.tab.active{color:var(--accent);border-bottom-color:var(--orange);background:var(--tint)}
 .tab:hover{color:var(--accent)}
-.search-bar{width:100%;padding:7px 11px;border:1px solid var(--border);border-radius:8px;font-size:11px;background:#fff;margin-bottom:9px;outline:none;color:var(--dark)}
-.search-bar:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(78,41,168,.1)}
-.twrap{overflow-x:auto;max-height:360px;overflow-y:auto;border-radius:8px;border:1px solid var(--tint)}
+.search-bar{width:100%;padding:8px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:12px;background:#fff;margin-bottom:10px;outline:none;color:var(--dark)}
+.search-bar:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(78,41,168,.1)}
+.twrap{overflow-x:auto;max-height:380px;overflow-y:auto;border-radius:10px;border:1px solid var(--tint)}
 table{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed}
-thead th{position:sticky;top:0;background:var(--base);color:#fff;padding:7px 9px;text-align:left;font-weight:600;font-size:9px;text-transform:uppercase;letter-spacing:.4px;cursor:pointer;white-space:nowrap;z-index:2}
-thead th:hover{background:var(--mid)}
+thead th{
+  position:sticky;top:0;
+  background:linear-gradient(135deg,var(--dark),var(--base));
+  color:#fff;padding:9px 10px;text-align:left;
+  font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;
+  cursor:pointer;white-space:nowrap;z-index:2;
+  font-family:'Space Grotesk',sans-serif;
+}
+thead th:hover{background:linear-gradient(135deg,var(--base),var(--mid))}
 tbody tr{border-bottom:1px solid var(--tint);transition:background .1s}
+tbody tr:nth-child(even){background:rgba(196,174,240,0.04)}
 tbody tr:hover{background:var(--paleorange)}
-tbody td{padding:6px 9px;color:#2E2A3A;overflow:hidden}
-.pill{display:inline-block;padding:2px 7px;border-radius:8px;font-size:9px;font-weight:700}
+
+/* Colourful agent name pill for leaderboard */
+.agent-name-cell{display:flex;align-items:center;gap:7px}
+.agent-color-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,0.2)}
+
+/* Glass rank badge in table */
+.rank-glass{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:22px;height:22px;border-radius:6px;
+  font-size:9px;font-weight:800;color:#fff;
+  box-shadow:0 2px 8px rgba(0,0,0,0.15),inset 0 1px 0 rgba(255,255,255,0.2);
+  font-family:'Space Grotesk',sans-serif;
+}
+
+tbody td{padding:7px 10px;color:#2E2A3A;overflow:hidden}
+.pill{display:inline-block;padding:3px 8px;border-radius:8px;font-size:9px;font-weight:700}
 .pg{background:#E8F5E9;color:#1B5E20}.pa{background:#FFF3E0;color:#BF360C}
 .pr{background:#FFEBEE;color:#B71C1C}.pb{background:var(--tint);color:var(--accent)}
 
 /* ── DONUT ── */
-.donut-wrap{position:relative;width:190px;height:190px;margin:0 auto 10px}
+.donut-wrap{position:relative;width:200px;height:200px;margin:0 auto 12px}
+
+/* ── SEC ROWS ── */
+.sec-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+
+/* ── DECORATIVE METRICS CHART (fills blank space) ── */
+.sparkline-wrap{padding:8px 0 4px}
+.sparkline-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.sparkline-label{font-size:10px;color:var(--mid);font-weight:600;width:52px;text-align:right;flex-shrink:0}
+.sparkline-track{flex:1;height:12px;border-radius:6px;background:var(--tint);overflow:hidden;position:relative}
+.sparkline-fill{
+  height:100%;border-radius:6px;
+  transition:width 1.4s cubic-bezier(.4,0,.2,1);
+  position:relative;overflow:hidden;
+}
+.sparkline-fill::before{content:'';position:absolute;top:0;left:0;right:0;height:45%;background:linear-gradient(180deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,0) 100%)}
+.sparkline-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.3) 0%,rgba(255,255,255,0) 60%)}
+.sparkline-val{font-size:10px;font-weight:800;color:var(--base);width:40px;font-family:'Space Grotesk',sans-serif}
 
 /* ── FOOTER ── */
-.footer{text-align:center;padding:16px 0 6px;font-size:10px;color:#9490B0}
+.footer{text-align:center;padding:18px 0 8px;font-size:10px;color:#9490B0}
 .footer strong{color:var(--accent)}
 
 /* ── LOADING OVERLAY ── */
-#overlay{position:fixed;inset:0;background:var(--base);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s}
+#overlay{position:fixed;inset:0;background:linear-gradient(135deg,var(--dark),var(--base));display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s}
 #overlay.hidden{opacity:0;pointer-events:none}
-.ov-title{font-size:28px;font-weight:800;color:#fff;margin-bottom:6px}
+.ov-title{font-size:32px;font-weight:900;color:#fff;margin-bottom:6px;font-family:'Space Grotesk',sans-serif}
 .ov-title span{color:var(--orange)}
 .ov-msg{font-size:12px;color:var(--light)}
-.ov-bar{width:220px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin-top:16px;overflow:hidden}
+.ov-bar{width:240px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin-top:16px;overflow:hidden}
 .ov-prog{height:100%;background:var(--orange);width:0;border-radius:2px;transition:width .4s}
 
-@media(max-width:900px){
+@media(max-width:1100px){
   .kpi-grid{grid-template-columns:repeat(3,1fr)}
   .sec-row{grid-template-columns:1fr}
+}
+@media(max-width:700px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .header h1{font-size:15px}
 }
 </style>
 </head>
 <body>
 
 <div id="overlay">
-  <div class="ov-title">CX <span>India</span> Dashboard</div>
+  <div class="ov-title">Inbound <span>Voice</span></div>
   <div class="ov-msg" id="ovMsg">Initialising…</div>
   <div class="ov-bar"><div class="ov-prog" id="ovProg"></div></div>
 </div>
 
 <div class="layout">
 
+  <!-- ── HEADER ── -->
   <div class="header">
-    <div>
-      <h1>
-<img src="StarZen@3x-8.png" alt="StarZen" style="height:32px;width:auto;vertical-align:middle;margin-right:8px;mix-blend-mode:lighten;"/>
-         <i class="ti ti-headset"></i>
-  <span id="hTitle"></span>
-</h1>
-      <div class="header-meta" id="headerMeta"></div>
+    <!-- Network lineart background -->
+    <div class="header-network">
+      <svg viewBox="0 0 1200 80" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <!-- Nodes -->
+        <circle cx="60" cy="20" r="3" fill="white"/><circle cx="180" cy="55" r="2.5" fill="white"/>
+        <circle cx="320" cy="15" r="3.5" fill="white"/><circle cx="420" cy="60" r="2" fill="white"/>
+        <circle cx="550" cy="25" r="3" fill="white"/><circle cx="660" cy="65" r="2.5" fill="white"/>
+        <circle cx="780" cy="20" r="3" fill="white"/><circle cx="880" cy="50" r="2" fill="white"/>
+        <circle cx="990" cy="18" r="3.5" fill="white"/><circle cx="1100" cy="55" r="2.5" fill="white"/>
+        <circle cx="130" cy="38" r="2" fill="white"/><circle cx="240" cy="30" r="2" fill="white"/>
+        <circle cx="380" cy="40" r="2.5" fill="white"/><circle cx="490" cy="48" r="2" fill="white"/>
+        <circle cx="610" cy="35" r="2" fill="white"/><circle cx="720" cy="45" r="2.5" fill="white"/>
+        <circle cx="840" cy="30" r="2" fill="white"/><circle cx="940" cy="60" r="2" fill="white"/>
+        <circle cx="1050" cy="38" r="2.5" fill="white"/>
+        <!-- Lines -->
+        <line x1="60" y1="20" x2="130" y2="38" stroke="white" stroke-width="0.8" opacity="0.6"/>
+        <line x1="130" y1="38" x2="180" y2="55" stroke="white" stroke-width="0.8" opacity="0.5"/>
+        <line x1="130" y1="38" x2="240" y2="30" stroke="white" stroke-width="0.8" opacity="0.6"/>
+        <line x1="240" y1="30" x2="320" y2="15" stroke="white" stroke-width="0.8" opacity="0.5"/>
+        <line x1="180" y1="55" x2="240" y2="30" stroke="white" stroke-width="0.6" opacity="0.4"/>
+        <line x1="320" y1="15" x2="380" y2="40" stroke="white" stroke-width="0.8" opacity="0.6"/>
+        <line x1="380" y1="40" x2="420" y2="60" stroke="white" stroke-width="0.7" opacity="0.5"/>
+        <line x1="380" y1="40" x2="490" y2="48" stroke="white" stroke-width="0.8" opacity="0.5"/>
+        <line x1="490" y1="48" x2="550" y2="25" stroke="white" stroke-width="0.8" opacity="0.6"/>
+        <line x1="490" y1="48" x2="610" y2="35" stroke="white" stroke-width="0.7" opacity="0.4"/>
+        <line x1="550" y1="25" x2="610" y2="35" stroke="white" stroke-width="0.6" opacity="0.5"/>
+        <line x1="610" y1="35" x2="660" y2="65" stroke="white" stroke-width="0.7" opacity="0.4"/>
+        <line x1="610" y1="35" x2="720" y2="45" stroke="white" stroke-width="0.8" opacity="0.6"/>
+        <line x1="720" y1="45" x2="780" y2="20" stroke="white" stroke-width="0.8" opacity="0.5"/>
+        <line x1="720" y1="45" x2="840" y2="30" stroke="white" stroke-width="0.7" opacity="0.5"/>
+        <line x1="840" y1="30" x2="880" y2="50" stroke="white" stroke-width="0.7" opacity="0.4"/>
+        <line x1="840" y1="30" x2="940" y2="60" stroke="white" stroke-width="0.6" opacity="0.4"/>
+        <line x1="880" y1="50" x2="940" y2="60" stroke="white" stroke-width="0.6" opacity="0.4"/>
+        <line x1="940" y1="60" x2="990" y2="18" stroke="white" stroke-width="0.8" opacity="0.5"/>
+        <line x1="990" y1="18" x2="1050" y2="38" stroke="white" stroke-width="0.8" opacity="0.6"/>
+        <line x1="1050" y1="38" x2="1100" y2="55" stroke="white" stroke-width="0.7" opacity="0.5"/>
+        <line x1="60" y1="20" x2="320" y2="15" stroke="white" stroke-width="0.4" opacity="0.25" stroke-dasharray="4,6"/>
+        <line x1="550" y1="25" x2="780" y2="20" stroke="white" stroke-width="0.4" opacity="0.2" stroke-dasharray="4,6"/>
+        <line x1="780" y1="20" x2="990" y2="18" stroke="white" stroke-width="0.4" opacity="0.2" stroke-dasharray="4,6"/>
+      </svg>
     </div>
+
+    <div class="header-left">
+      <!-- Starzen Logo -->
+      <div class="starzen-logo">
+        <div class="starzen-star">⭐</div>
+        <div class="starzen-wordmark">Starzen</div>
+      </div>
+      <div class="header-title-block">
+        <h1><span id="hTitle"></span> <span class="title-pill" id="hBadge"></span></h1>
+        <div class="header-meta" id="headerMeta"></div>
+      </div>
+    </div>
+
     <div class="header-right">
       <span class="sync-status">
         <span class="sync-dot" id="syncDot"></span>
@@ -242,10 +497,10 @@ tbody td{padding:6px 9px;color:#2E2A3A;overflow:hidden}
       <button class="sync-btn" onclick="fetchSheetData()">
         <i class="ti ti-refresh" style="font-size:11px"></i>Refresh now
       </button>
-      <span class="hbadge" id="hBadge"></span>
     </div>
   </div>
 
+  <!-- Config bar -->
   <div class="config-bar">
     <label><i class="ti ti-brand-google" style="font-size:12px;margin-right:2px"></i>Google Sheet ID:</label>
     <input type="text" id="sheetIdInput" placeholder="Paste Sheet ID from URL"/>
@@ -257,13 +512,19 @@ tbody td{padding:6px 9px;color:#2E2A3A;overflow:hidden}
     <span class="config-note">File → Share → Publish to web → copy ID from URL between /d/ and /edit</span>
   </div>
 
+  <!-- ── PAGE 1: KPIs ── -->
+  <div class="kpi-section-header">
+    <span class="section-title section-title-highlight">Performance Overview</span>
+  </div>
   <div class="kpi-grid" id="kpiGrid"></div>
 
+  <!-- ── STAR CARD ── -->
   <div class="star-card" id="starCard" style="display:none"></div>
 
+  <!-- ── TARGET vs ACHIEVEMENT + PERF BARS ── -->
   <div class="sec-row">
     <div class="card" id="secTVA" style="display:none">
-      <div class="ct"><i class="ti ti-target"></i>Target vs achievement</div>
+      <div class="ct"><i class="ti ti-target"></i><span class="section-title" style="font-size:13px;border:none;margin:0;padding:0">Target vs Achievement</span></div>
       <div class="tgt-input-row">
         <label>Daily target (calls/agent):</label>
         <input type="number" id="tgtInput" min="1" max="999"/>
@@ -271,8 +532,8 @@ tbody td{padding:6px 9px;color:#2E2A3A;overflow:hidden}
       </div>
       <div id="tvaList"></div>
     </div>
-    <div class="card" id="secPerf" style="display:none;overflow-y:auto;max-height:560px">
-      <div class="ct"><i class="ti ti-chart-bar"></i>Agent performance bars</div>
+    <div class="card" id="secPerf" style="display:none;overflow-y:auto;max-height:580px">
+      <div class="ct"><i class="ti ti-chart-bar"></i><span class="section-title" style="font-size:13px;border:none;margin:0;padding:0">Agent Performance Bars</span></div>
       <div class="ckey">
         <span style="font-weight:700;color:var(--accent);font-size:9px">Bar colours:</span>
         <span class="cki"><span class="cksw" id="swHigh"></span>High</span>
@@ -284,24 +545,34 @@ tbody td{padding:6px 9px;color:#2E2A3A;overflow:hidden}
     </div>
   </div>
 
+  <!-- ── DONUT + CONTRIB ── -->
   <div class="sec-row">
     <div class="card" id="secDonut" style="display:none">
-      <div class="ct"><i class="ti ti-chart-donut"></i>Contribution to today's calls</div>
+      <div class="ct"><i class="ti ti-chart-donut"></i><span class="section-title" style="font-size:13px;border:none;margin:0;padding:0">Contribution to Today's Calls</span></div>
       <div class="donut-wrap">
-        <canvas id="donutC" width="190" height="190" role="img" aria-label="Call contribution donut"></canvas>
+        <canvas id="donutC" width="200" height="200" role="img" aria-label="Call contribution donut"></canvas>
       </div>
-      <div id="donutLeg" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;font-size:9px;margin-top:4px"></div>
+      <div id="donutLeg" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;font-size:9px;margin-top:6px"></div>
     </div>
     <div class="card" id="secContrib" style="display:none">
-      <div class="ct"><i class="ti ti-trophy"></i>Top contributors — calls handled</div>
+      <div class="ct"><i class="ti ti-trophy"></i><span class="section-title" style="font-size:13px;border:none;margin:0;padding:0">Top Contributors — Calls Handled</span></div>
       <div id="contribList"></div>
+      <!-- Decorative VOC team sparkline fills blank space -->
+      <div id="vocSparkline" class="sparkline-wrap" style="margin-top:10px;border-top:1px solid var(--tint);padding-top:12px;display:none">
+        <div style="font-size:9px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">
+          <i class="ti ti-stars" style="margin-right:4px;color:var(--orange)"></i>VOC Score by Agent
+        </div>
+        <div id="vocSparklineList"></div>
+      </div>
     </div>
   </div>
 
+  <!-- ── LEADERBOARD (Page 5) ── -->
   <div class="card-full" id="secLeaderboard" style="display:none">
     <div class="ct">
-      <i class="ti ti-list-details"></i>Agent leaderboard
-      <span id="tblCount" style="margin-left:auto;font-size:10px;font-weight:400;color:#9490B0;text-transform:none;letter-spacing:0"></span>
+      <i class="ti ti-list-details"></i>
+      <span class="section-title" style="font-size:15px;border:none;margin:0;padding:0">Agent Leaderboard</span>
+      <span id="tblCount" style="margin-left:auto;font-size:11px;font-weight:600;color:#9490B0;text-transform:none;letter-spacing:0;font-family:'Inter',sans-serif"></span>
     </div>
     <div class="tab-bar">
       <button class="tab active" onclick="switchTab('india',this)" id="tabIndia"></button>
@@ -328,7 +599,12 @@ const C = DASHBOARD_CONFIG;
 const T = C.targets;
 const TH = C.theme;
 
-const AVC = ['#FF7722','#4E29A8','#D84E00','#7C52CC','#F05A00','#2D1666','#FF9A55','#5E35B1','#E65100','#9490B0','#3D1F8A','#8B5CF6','#BF360C','#6A4BC4'];
+// Rich 15-colour palette for leaderboard members
+const AVC = [
+  '#E74C3C','#9B59B6','#2980B9','#27AE60','#F39C12',
+  '#1ABC9C','#E67E22','#8E44AD','#2ECC71','#3498DB',
+  '#E91E63','#FF5722','#00BCD4','#4CAF50','#FF9800'
+];
 
 let INDIA = [...C.fallbackIndia];
 let QATAR = [...C.fallbackQatar];
@@ -359,11 +635,11 @@ function applyTheme(){
 // ─── Apply branding from config ───
 function applyBranding(){
   document.title = C.branding.title;
-  document.getElementById('hTitle').textContent = C.branding.title;
+  document.getElementById('hTitle').textContent = 'Inbound Voice — India';
   document.getElementById('headerMeta').innerHTML =
     `${C.branding.subtitle} &nbsp;·&nbsp; ${C.branding.periodLabel} &nbsp;·&nbsp; ${INDIA.length} agents`;
   document.getElementById('hBadge').innerHTML =
-    `<i class="ti ti-flag" style="font-size:11px"></i>${C.branding.teamLabel}`;
+    `<i class="ti ti-flag" style="font-size:10px"></i>&nbsp;${C.branding.teamLabel}`;
   document.getElementById('footerText').innerHTML =
     `${C.branding.footerText} &nbsp;·&nbsp; <strong>${C.teams.teamA.name} Team</strong>`;
   document.getElementById('tgtInput').value = T.defaultDailyTarget;
@@ -381,26 +657,26 @@ function applyBranding(){
 
   // Sections visibility
   const S = C.sections;
-  document.getElementById('starCard').style.display      = S.showStarCard       ? '' : 'none';
-  document.getElementById('secTVA').style.display        = S.showTargetVsAchiev ? '' : 'none';
-  document.getElementById('secPerf').style.display       = S.showPerfBars       ? '' : 'none';
-  document.getElementById('secDonut').style.display      = S.showDonut          ? '' : 'none';
-  document.getElementById('secContrib').style.display    = S.showContribList    ? '' : 'none';
-  document.getElementById('secLeaderboard').style.display= S.showLeaderboard    ? '' : 'none';
+  document.getElementById('starCard').style.display       = S.showStarCard       ? '' : 'none';
+  document.getElementById('secTVA').style.display         = S.showTargetVsAchiev ? '' : 'none';
+  document.getElementById('secPerf').style.display        = S.showPerfBars       ? '' : 'none';
+  document.getElementById('secDonut').style.display       = S.showDonut          ? '' : 'none';
+  document.getElementById('secContrib').style.display     = S.showContribList    ? '' : 'none';
+  document.getElementById('secLeaderboard').style.display = S.showLeaderboard    ? '' : 'none';
 
-  // Table header from column config
+  // Table header
   const cols = C.columns;
   document.getElementById('tblHead').innerHTML = `<tr>
-    <th style="width:26px" onclick="srt('no')"># ↕</th>
-    <th style="width:150px" onclick="srt('name')">Agent ↕</th>
-    ${cols.showCalls   ?`<th style="width:105px" onclick="srt('answered')">Calls ↕</th>`:''}
-    ${cols.showVOC     ?`<th style="width:90px"  onclick="srt('voc')">VOC ↕</th>`:''}
-    ${cols.showHold    ?`<th style="width:90px"  onclick="srt('holdPct')">Hold % ↕</th>`:''}
-    ${cols.showAHT     ?`<th style="width:90px"  onclick="srt('aht')">AHT ↕</th>`:''}
-    ${cols.showSurveys ?`<th style="width:46px"  onclick="srt('surveys')">Surv.</th>`:''}
-    ${cols.showShare   ?`<th style="width:50px"  onclick="srt('contrib')">Share ↕</th>`:''}
-    ${cols.showTarget  ?`<th style="width:54px"  onclick="srt('tgtPct')">Tgt % ↕</th>`:''}
-    ${cols.showStatus  ?`<th style="width:52px">Status</th>`:''}
+    <th style="width:36px" onclick="srt('no')"># ↕</th>
+    <th style="width:160px" onclick="srt('name')">Agent ↕</th>
+    ${cols.showCalls   ?`<th style="width:110px" onclick="srt('answered')">Calls ↕</th>`:``}
+    ${cols.showVOC     ?`<th style="width:90px"  onclick="srt('voc')">VOC ↕</th>`:``}
+    ${cols.showHold    ?`<th style="width:90px"  onclick="srt('holdPct')">Hold % ↕</th>`:``}
+    ${cols.showAHT     ?`<th style="width:90px"  onclick="srt('aht')">AHT ↕</th>`:``}
+    ${cols.showSurveys ?`<th style="width:52px"  onclick="srt('surveys')">Surv.</th>`:``}
+    ${cols.showShare   ?`<th style="width:56px"  onclick="srt('contrib')">Share ↕</th>`:``}
+    ${cols.showTarget  ?`<th style="width:58px"  onclick="srt('tgtPct')">Tgt % ↕</th>`:``}
+    ${cols.showStatus  ?`<th style="width:58px">Status</th>`:``}
   </tr>`;
 
   // Pre-fill Sheet ID from config if provided
@@ -410,11 +686,11 @@ function applyBranding(){
   }
 }
 
-// ─── Colour helpers (use config thresholds) ───
-function pCol(r){ return r >= .9 ? T.barColourHigh : r >= .7 ? T.barColourMid : T.barColourLow; }
-function vCol(v){ return v >= T.vocHigh ? T.barColourHigh : v >= T.vocLow ? T.barColourMid : T.barColourLow; }
-function hCol(p){ return p <= T.holdLow ? T.barColourHigh : p <= T.holdHigh ? T.barColourMid : T.barColourLow; }
-function aCol(v,mx){ const r=v/mx; return r<=.5 ? T.barColourHigh : r<=.75 ? T.barColourMid : T.barColourLow; }
+// ─── Colour helpers ───
+function pCol(r){ return r>=.9?T.barColourHigh:r>=.7?T.barColourMid:T.barColourLow; }
+function vCol(v){ return v>=T.vocHigh?T.barColourHigh:v>=T.vocLow?T.barColourMid:T.barColourLow; }
+function hCol(p){ return p<=T.holdLow?T.barColourHigh:p<=T.holdHigh?T.barColourMid:T.barColourLow; }
+function aCol(v,mx){ const r=v/mx; return r<=.5?T.barColourHigh:r<=.75?T.barColourMid:T.barColourLow; }
 function ini(n){ return n.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase(); }
 
 function animateBars(){
@@ -425,30 +701,26 @@ function animateBars(){
 
 // ─── Google Sheets sync ───
 function setSyncState(state,msg){
-  document.getElementById('syncDot').className = 'sync-dot'+(state==='loading'?' loading':state==='error'?' error':'');
-  document.getElementById('syncMsg').textContent = msg;
+  document.getElementById('syncDot').className='sync-dot'+(state==='loading'?' loading':state==='error'?' error':'');
+  document.getElementById('syncMsg').textContent=msg;
 }
-function setProgress(p){ document.getElementById('ovProg').style.width = p+'%'; }
-function setOvMsg(m){ document.getElementById('ovMsg').textContent = m; }
+function setProgress(p){ document.getElementById('ovProg').style.width=p+'%'; }
+function setOvMsg(m){ document.getElementById('ovMsg').textContent=m; }
 function hideOverlay(){ document.getElementById('overlay').classList.add('hidden'); }
 
 function parseGvizRow(row){
-  const cells = row.c||[];
-  const g = i => { const c=cells[i]; return (c&&c.v!==null&&c.v!==undefined)?c.v:null; };
-  return {
-    id:       g(0),
-    name:     String(g(1)||''),
-    team:     String(g(2)||''),
-    surveys:  Number(g(3))||0,
-    voc:      g(4)!==null ? Number(g(4)) : null,
-    answered: Number(g(5))||0,
-    holdPct:  g(7)!==null ? Number(g(7)) : 0,
-    aht:      g(13)!==null ? Number(g(13)) : null,
+  const cells=row.c||[];
+  const g=i=>{const c=cells[i];return(c&&c.v!==null&&c.v!==undefined)?c.v:null;};
+  return{
+    id:g(0),name:String(g(1)||''),team:String(g(2)||''),
+    surveys:Number(g(3))||0,voc:g(4)!==null?Number(g(4)):null,
+    answered:Number(g(5))||0,holdPct:g(7)!==null?Number(g(7)):0,
+    aht:g(13)!==null?Number(g(13)):null,
   };
 }
 
 async function fetchSheetData(){
-  const sheetId = document.getElementById('sheetIdInput').value.trim();
+  const sheetId=document.getElementById('sheetIdInput').value.trim();
   if(!sheetId){
     setSyncState('error','No Sheet ID — using built-in data');
     INDIA=[...C.fallbackIndia]; QATAR=[...C.fallbackQatar];
@@ -456,25 +728,25 @@ async function fetchSheetData(){
   }
   setSyncState('loading','Fetching from Google Sheets…');
   setOvMsg('Connecting to Google Sheets…'); setProgress(20);
-  const gid = document.getElementById('gidInput').value.trim()||'0';
-  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
+  const gid=document.getElementById('gidInput').value.trim()||'0';
+  const url=`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
   try{
-    const res  = await fetch(url);
+    const res=await fetch(url);
     if(!res.ok) throw new Error('HTTP '+res.status);
-    const text = await res.text();
+    const text=await res.text();
     setProgress(60); setOvMsg('Parsing data…');
-    const json  = JSON.parse(text.replace(/^[^\{]+/,'').replace(/\);\s*$/,''));
-    const rows  = ((json.table||{}).rows)||[];
-    const all   = rows.slice(1).map(parseGvizRow).filter(a=>a.name&&a.name.length>2);
-    const tA    = C.teams.teamA.sheetLabel.toLowerCase();
-    const tB    = C.teams.teamB.sheetLabel.toLowerCase();
-    const india = all.filter(a=>a.team.toLowerCase().includes(tA));
-    const qatar = all.filter(a=>a.team.toLowerCase().includes(tB));
+    const json=JSON.parse(text.replace(/^[^\{]+/,'').replace(/\);\s*$/,''));
+    const rows=((json.table||{}).rows)||[];
+    const all=rows.slice(1).map(parseGvizRow).filter(a=>a.name&&a.name.length>2);
+    const tA=C.teams.teamA.sheetLabel.toLowerCase();
+    const tB=C.teams.teamB.sheetLabel.toLowerCase();
+    const india=all.filter(a=>a.team.toLowerCase().includes(tA));
+    const qatar=all.filter(a=>a.team.toLowerCase().includes(tB));
     if(india.length) INDIA=india; else INDIA=[...C.fallbackIndia];
     if(qatar.length) QATAR=qatar; else QATAR=[...C.fallbackQatar];
-    const now = new Date().toLocaleTimeString();
+    const now=new Date().toLocaleTimeString();
     setSyncState('ok',`Synced ${now} · ${INDIA.length} ${C.teams.teamA.name}, ${QATAR.length} ${C.teams.teamB.name}`);
-    document.getElementById('headerMeta').innerHTML =
+    document.getElementById('headerMeta').innerHTML=
       `${C.branding.subtitle} &nbsp;·&nbsp; ${C.branding.periodLabel} &nbsp;·&nbsp; ${INDIA.length} agents · Auto-sync ON`;
     setProgress(100); setOvMsg('Loaded!');
   }catch(err){
@@ -487,45 +759,46 @@ async function fetchSheetData(){
   renderAll();
 }
 
-// Auto-refresh
 setInterval(()=>{ if(document.getElementById('sheetIdInput').value.trim()) fetchSheetData(); },
-  C.googleSheets.autoRefreshMinutes * 60 * 1000);
+  C.googleSheets.autoRefreshMinutes*60*1000);
 
 // ─── KPIs ───
 function renderKPIs(){
   if(!C.sections.showKPIStrip){ document.getElementById('kpiGrid').style.display='none'; return; }
-  const act = INDIA.filter(a=>a.answered>0);
-  const tot = INDIA.reduce((s,a)=>s+a.answered,0);
-  const vV  = INDIA.filter(a=>a.voc!==null&&a.surveys>0);
-  const aV  = act.filter(a=>a.aht);
-  const avgV= vV.length ? vV.reduce((s,a)=>s+a.voc,0)/vV.length : 0;
-  const avgA= aV.length ? aV.reduce((s,a)=>s+a.aht,0)/aV.length : 0;
-  const surv= INDIA.reduce((s,a)=>s+a.surveys,0);
+  const act=INDIA.filter(a=>a.answered>0);
+  const tot=INDIA.reduce((s,a)=>s+a.answered,0);
+  const vV=INDIA.filter(a=>a.voc!==null&&a.surveys>0);
+  const aV=act.filter(a=>a.aht);
+  const avgV=vV.length?vV.reduce((s,a)=>s+a.voc,0)/vV.length:0;
+  const avgA=aV.length?aV.reduce((s,a)=>s+a.aht,0)/aV.length:0;
+  const surv=INDIA.reduce((s,a)=>s+a.surveys,0);
   document.getElementById('kpiGrid').innerHTML=`
     <div class="kpi"><div class="kpi-lbl">Total calls</div><div class="kpi-val">${tot.toLocaleString()}</div><div class="kpi-sub">India inbound</div><i class="ti ti-phone-call kpi-ico"></i></div>
     <div class="kpi"><div class="kpi-lbl">Avg VOC</div><div class="kpi-val">${(avgV*100).toFixed(1)}%</div><div class="kpi-sub">satisfaction score</div><i class="ti ti-star kpi-ico"></i></div>
     <div class="kpi"><div class="kpi-lbl">Avg AHT</div><div class="kpi-val">${Math.round(avgA)}s</div><div class="kpi-sub">avg handle time</div><i class="ti ti-clock kpi-ico"></i></div>
     <div class="kpi"><div class="kpi-lbl">Surveys</div><div class="kpi-val">${surv}</div><div class="kpi-sub">received</div><i class="ti ti-clipboard-list kpi-ico"></i></div>
-    <div class="kpi"><div class="kpi-lbl">Active agents</div><div class="kpi-val">${act.length}<span style="font-size:13px;font-weight:400;color:#9490B0">/${INDIA.length}</span></div><div class="kpi-sub">handling calls</div><i class="ti ti-users kpi-ico"></i></div>
+    <div class="kpi"><div class="kpi-lbl">Active agents</div><div class="kpi-val">${act.length}<span style="font-size:14px;font-weight:500;color:#9490B0">/${INDIA.length}</span></div><div class="kpi-sub">handling calls</div><i class="ti ti-users kpi-ico"></i></div>
   `;
 }
 
-// ─── Star card ───
+// ─── Star card (with animated trophy + GIF celebration) ───
 function renderStar(){
   if(!C.sections.showStarCard) return;
-  const W = C.starWeights;
-  const sc = INDIA.filter(a=>a.answered>0).map(a=>({...a,
-    score: (a.voc||0)*W.voc + Math.min(a.answered/160,1)*W.calls +
-           (1-Math.min(a.holdPct,1))*W.hold + Math.min(a.surveys/10,1)*W.surveys
+  const W=C.starWeights;
+  const sc=INDIA.filter(a=>a.answered>0).map(a=>({...a,
+    score:(a.voc||0)*W.voc+Math.min(a.answered/160,1)*W.calls+
+          (1-Math.min(a.holdPct,1))*W.hold+Math.min(a.surveys/10,1)*W.surveys
   })).sort((a,b)=>b.score-a.score);
   if(!sc.length) return;
-  const s = sc[0];
+  const s=sc[0];
   document.getElementById('starCard').style.display='';
+
+  // Animated trophy emoji as the GIF stand-in (works everywhere, no external dependency)
   document.getElementById('starCard').innerHTML=`
-    <div class="star-avatar">${ini(s.name)}</div>
+    <div class="star-trophy" title="Top Performer">🏆</div>
     <div class="star-info">
       <div class="star-name"><i class="ti ti-star-filled"></i>${s.name}</div>
-      <div class="star-role">Star Contributor · ${C.branding.periodLabel} · Score: ${Math.round(s.score)}/100</div>
+      <div class="star-role">⭐ Star Contributor &nbsp;·&nbsp; ${C.branding.periodLabel} &nbsp;·&nbsp; Score: <strong style="color:var(--orange)">${Math.round(s.score)}/100</strong></div>
       <div class="star-stats">
         <div><div class="ss-val">${s.answered}</div><div class="ss-lbl">Calls</div></div>
         <div><div class="ss-val">${s.voc?(s.voc*100).toFixed(0)+'%':'—'}</div><div class="ss-lbl">VOC</div></div>
@@ -534,20 +807,20 @@ function renderStar(){
         <div><div class="ss-val">${(s.holdPct*100).toFixed(0)}%</div><div class="ss-lbl">Hold</div></div>
       </div>
     </div>
-    <span class="star-badge"><i class="ti ti-award" style="font-size:11px;margin-right:3px"></i>Top performer</span>
+    <span class="star-badge"><i class="ti ti-award" style="font-size:12px;margin-right:4px"></i>Top Performer</span>
   `;
 }
 
 // ─── TVA ───
 function renderTVA(){
   if(!C.sections.showTargetVsAchiev) return;
-  const tgt = parseInt(document.getElementById('tgtInput').value)||T.defaultDailyTarget;
-  const act = INDIA.filter(a=>a.answered>0).sort((a,b)=>b.answered-a.answered);
-  document.getElementById('tvaList').innerHTML = act.map(a=>{
-    const ratio = a.answered/tgt;
-    const w     = Math.min(ratio*100,100).toFixed(1);
-    const col   = pCol(ratio);
-    const lbl   = ratio>=1 ? 'Target met' : Math.round(ratio*100)+'%';
+  const tgt=parseInt(document.getElementById('tgtInput').value)||T.defaultDailyTarget;
+  const act=INDIA.filter(a=>a.answered>0).sort((a,b)=>b.answered-a.answered);
+  document.getElementById('tvaList').innerHTML=act.map(a=>{
+    const ratio=a.answered/tgt;
+    const w=Math.min(ratio*100,100).toFixed(1);
+    const col=pCol(ratio);
+    const lbl=ratio>=1?'✓ Met':Math.round(ratio*100)+'%';
     return `<div class="tva-item">
       <div class="tva-name-row">
         <span class="tva-name">${a.name.split(' ')[0]}</span>
@@ -565,15 +838,15 @@ function renderTVA(){
 // ─── Perf bars ───
 function renderPerf(){
   if(!C.sections.showPerfBars) return;
-  const act = INDIA.filter(a=>a.answered>0).sort((a,b)=>b.answered-a.answered);
-  const mxC = act[0]?.answered||1;
-  const mxA = Math.max(...act.filter(a=>a.aht).map(a=>a.aht),1);
-  document.getElementById('perfList').innerHTML = act.map((a,i)=>{
-    const cW = Math.round(a.answered/mxC*100);
-    const vW = a.voc!=null ? Math.round(a.voc*100) : 0;
-    const hW = Math.round(Math.max(0,(1-a.holdPct*2))*100);
-    const aW = a.aht ? Math.round(Math.max(0,(1-a.aht/mxA))*100) : 0;
-    const av = AVC[i%AVC.length];
+  const act=INDIA.filter(a=>a.answered>0).sort((a,b)=>b.answered-a.answered);
+  const mxC=act[0]?.answered||1;
+  const mxA=Math.max(...act.filter(a=>a.aht).map(a=>a.aht),1);
+  document.getElementById('perfList').innerHTML=act.map((a,i)=>{
+    const cW=Math.round(a.answered/mxC*100);
+    const vW=a.voc!=null?Math.round(a.voc*100):0;
+    const hW=Math.round(Math.max(0,(1-a.holdPct*2))*100);
+    const aW=a.aht?Math.round(Math.max(0,(1-a.aht/mxA))*100):0;
+    const av=AVC[i%AVC.length];
     return `<div class="perf-item">
       <div class="perf-head">
         <span class="perf-rank" style="color:${i<3?av:'#9490B0'}">${i+1}</span>
@@ -594,39 +867,54 @@ function renderPerf(){
 // ─── Donut ───
 function renderDonut(){
   if(!C.sections.showDonut) return;
-  const act = INDIA.filter(a=>a.answered>0).sort((a,b)=>b.answered-a.answered);
-  const tot = act.reduce((s,a)=>s+a.answered,0)||1;
-  const ctx = document.getElementById('donutC').getContext('2d');
+  const act=INDIA.filter(a=>a.answered>0).sort((a,b)=>b.answered-a.answered);
+  const tot=act.reduce((s,a)=>s+a.answered,0)||1;
+  const ctx=document.getElementById('donutC').getContext('2d');
   if(donutInst) donutInst.destroy();
-  donutInst = new Chart(ctx,{
+  donutInst=new Chart(ctx,{
     type:'doughnut',
-    data:{ labels:act.map(a=>a.name.split(' ')[0]), datasets:[{ data:act.map(a=>a.answered), backgroundColor:AVC.slice(0,act.length), borderWidth:2, borderColor:'#fff', hoverOffset:6 }] },
-    options:{ responsive:false, plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>`${c.label}: ${c.parsed} (${(c.parsed/tot*100).toFixed(1)}%)`}} }, cutout:'62%' }
+    data:{labels:act.map(a=>a.name.split(' ')[0]),datasets:[{data:act.map(a=>a.answered),backgroundColor:AVC.slice(0,act.length),borderWidth:2,borderColor:'#fff',hoverOffset:8}]},
+    options:{responsive:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.label}: ${c.parsed} (${(c.parsed/tot*100).toFixed(1)}%)`}}},cutout:'60%'}
   });
-  document.getElementById('donutLeg').innerHTML = act.slice(0,8).map((a,i)=>
-    `<span style="display:flex;align-items:center;gap:3px"><span style="width:9px;height:9px;border-radius:2px;background:${AVC[i]};flex-shrink:0"></span><span>${a.name.split(' ')[0]}</span></span>`
+  document.getElementById('donutLeg').innerHTML=act.slice(0,10).map((a,i)=>
+    `<span style="display:flex;align-items:center;gap:3px"><span style="width:10px;height:10px;border-radius:3px;background:${AVC[i]};flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,0.15)"></span><span style="font-size:9px;font-weight:500">${a.name.split(' ')[0]}</span></span>`
   ).join('');
 }
 
-// ─── Contrib list ───
+// ─── Contrib list + VOC sparkline to fill blank space ───
 function renderContrib(){
   if(!C.sections.showContribList) return;
-  const act = INDIA.filter(a=>a.answered>0).sort((a,b)=>b.answered-a.answered);
-  const tot = act.reduce((s,a)=>s+a.answered,0)||1;
-  document.getElementById('contribList').innerHTML = act.slice(0,8).map((a,i)=>{
-    const pct = (a.answered/tot*100).toFixed(1);
-    const bW  = Math.round(a.answered/act[0].answered*100);
+  const act=INDIA.filter(a=>a.answered>0).sort((a,b)=>b.answered-a.answered);
+  const tot=act.reduce((s,a)=>s+a.answered,0)||1;
+  document.getElementById('contribList').innerHTML=act.slice(0,8).map((a,i)=>{
+    const pct=(a.answered/tot*100).toFixed(1);
+    const bW=Math.round(a.answered/act[0].answered*100);
     return `<div class="contrib-item">
       <div class="contrib-rank" style="background:${AVC[i]}">${i+1}</div>
-      <span style="font-size:11px;font-weight:600;color:var(--base);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.name.split(' ').slice(0,2).join(' ')}</span>
+      <span class="contrib-name">${a.name.split(' ').slice(0,2).join(' ')}</span>
       <div class="contrib-bar-outer"><div class="contrib-bar-inner" style="background:${AVC[i]}" data-w="${bW}"></div></div>
       <span class="contrib-pct">${pct}%</span>
     </div>`;
   }).join('');
+
+  // VOC sparkline to fill blank space at bottom
+  const vocAgents=INDIA.filter(a=>a.voc!==null&&a.answered>0).sort((a,b)=>b.voc-a.voc).slice(0,6);
+  if(vocAgents.length){
+    document.getElementById('vocSparkline').style.display='';
+    document.getElementById('vocSparklineList').innerHTML=vocAgents.map((a,i)=>{
+      const w=Math.round((a.voc||0)*100);
+      const col=vCol(a.voc||0);
+      return `<div class="sparkline-bar-row">
+        <span class="sparkline-label">${a.name.split(' ')[0]}</span>
+        <div class="sparkline-track"><div class="sparkline-fill" style="background:${col}" data-w="${w}"></div></div>
+        <span class="sparkline-val" style="color:${col}">${(w)}%</span>
+      </div>`;
+    }).join('');
+  }
   setTimeout(animateBars,80);
 }
 
-// ─── Table ───
+// ─── Table (Page 5 — full 15 colours + glass rank badges) ───
 function switchTab(k,el){
   activeTab=k;
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -642,43 +930,50 @@ function getStatus(a){
 function srt(col){ if(sortCol===col) sortDir*=-1; else{sortCol=col;sortDir=-1;} renderTable(); }
 function renderTable(){
   if(!C.sections.showLeaderboard) return;
-  const q   = (document.getElementById('searchBox').value||'').toLowerCase();
-  const tgt = parseInt(document.getElementById('tgtInput').value)||T.defaultDailyTarget;
-  const cols = C.columns;
-  let pool  = activeTab==='india' ? INDIA : activeTab==='qatar' ? QATAR : [...INDIA,...QATAR];
-  const mxC = Math.max(...pool.map(a=>a.answered),1);
-  const mxA = Math.max(...pool.filter(a=>a.aht).map(a=>a.aht),1);
-  const totC= pool.reduce((s,a)=>s+a.answered,0)||1;
-  let data  = pool.map(a=>({...a, contrib:a.answered/totC*100, tgtPct:a.answered/tgt*100}));
-  if(q) data = data.filter(a=>a.name.toLowerCase().includes(q)||String(a.id||'').includes(q));
-  data = [...data].sort((a,b)=>{
+  const q=(document.getElementById('searchBox').value||'').toLowerCase();
+  const tgt=parseInt(document.getElementById('tgtInput').value)||T.defaultDailyTarget;
+  const cols=C.columns;
+  let pool=activeTab==='india'?INDIA:activeTab==='qatar'?QATAR:[...INDIA,...QATAR];
+  const mxC=Math.max(...pool.map(a=>a.answered),1);
+  const mxA=Math.max(...pool.filter(a=>a.aht).map(a=>a.aht),1);
+  const totC=pool.reduce((s,a)=>s+a.answered,0)||1;
+  let data=pool.map(a=>({...a,contrib:a.answered/totC*100,tgtPct:a.answered/tgt*100}));
+  if(q) data=data.filter(a=>a.name.toLowerCase().includes(q)||String(a.id||'').includes(q));
+  data=[...data].sort((a,b)=>{
     if(sortCol==='name') return sortDir*(a.name<b.name?-1:1);
-    const mp = {answered:'answered',voc:'voc',aht:'aht',holdPct:'holdPct',surveys:'surveys',contrib:'contrib',tgtPct:'tgtPct',no:'id'};
+    const mp={answered:'answered',voc:'voc',aht:'aht',holdPct:'holdPct',surveys:'surveys',contrib:'contrib',tgtPct:'tgtPct',no:'id'};
     return sortDir*((a[mp[sortCol]]??-999)-(b[mp[sortCol]]??-999));
   });
-  document.getElementById('tblCount').textContent = data.length+' agents';
-  document.getElementById('tblBody').innerHTML = data.map((a,i)=>{
-    const st = getStatus(a);
-    const cW = Math.round(a.answered/mxC*100);
-    const vW = a.voc!=null ? Math.round(a.voc*100) : 0;
-    const hW = Math.round(a.holdPct*100);
-    const aW = a.aht ? Math.round(a.aht/mxA*100) : 0;
-    const tC = a.answered>=tgt ? T.barColourHigh : a.answered>=tgt*.8 ? T.barColourMid : T.barColourLow;
+  document.getElementById('tblCount').textContent=data.length+' agents';
+  document.getElementById('tblBody').innerHTML=data.map((a,i)=>{
+    const st=getStatus(a);
+    const cW=Math.round(a.answered/mxC*100);
+    const vW=a.voc!=null?Math.round(a.voc*100):0;
+    const hW=Math.round(a.holdPct*100);
+    const aW=a.aht?Math.round(a.aht/mxA*100):0;
+    const tC=a.answered>=tgt?T.barColourHigh:a.answered>=tgt*.8?T.barColourMid:T.barColourLow;
+    const agentColor=AVC[i%AVC.length];
     return `<tr>
-      <td style="color:#9490B0;font-size:10px">${i+1}</td>
-      <td style="font-weight:600;color:var(--base);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.name.length>22?a.name.slice(0,20)+'…':a.name}</td>
-      ${cols.showCalls?`<td><div class="mini-bar-outer"><div class="mini-bar-inner" style="background:${pCol(a.answered/mxC)}" data-w="${cW}"></div></div><span class="vl" style="color:${pCol(a.answered/mxC)}">${a.answered}</span></td>`:''}
-      ${cols.showVOC?`<td>${a.voc!=null?`<div class="mini-bar-outer"><div class="mini-bar-inner" style="background:${vCol(a.voc)}" data-w="${vW}"></div></div><span class="vl" style="color:${vCol(a.voc)}">${(a.voc*100).toFixed(0)}%</span>`:'<span style="color:#9490B0;font-size:9px">—</span>'}</td>`:''}
-      ${cols.showHold?`<td><div class="mini-bar-outer"><div class="mini-bar-inner" style="background:${hCol(a.holdPct)}" data-w="${hW}"></div></div><span class="vl" style="color:${hCol(a.holdPct)}">${(a.holdPct*100).toFixed(0)}%</span></td>`:''}
-      ${cols.showAHT?`<td>${a.aht?`<div class="mini-bar-outer"><div class="mini-bar-inner" style="background:${aCol(a.aht,mxA)}" data-w="${aW}"></div></div><span class="vl" style="color:${aCol(a.aht,mxA)}">${Math.round(a.aht)}s</span>`:'<span style="color:#9490B0;font-size:9px">—</span>'}</td>`:''}
-      ${cols.showSurveys?`<td style="font-size:9px;color:#5A566E">${a.surveys}</td>`:''}
-      ${cols.showShare?`<td style="font-weight:700;color:var(--accent);font-size:9px">${a.contrib.toFixed(1)}%</td>`:''}
-      ${cols.showTarget?`<td style="font-weight:700;font-size:9px;color:${tC}">${a.tgtPct.toFixed(0)}%</td>`:''}
-      ${cols.showStatus?`<td><span class="pill p${st.c.slice(1)}">${st.l}</span></td>`:''}
+      <td><span class="rank-glass" style="background:linear-gradient(135deg,${agentColor},${agentColor}cc);box-shadow:0 2px 8px ${agentColor}55">${i+1}</span></td>
+      <td>
+        <div class="agent-name-cell">
+          <span class="agent-color-dot" style="background:${agentColor}"></span>
+          <span style="font-weight:700;color:var(--base);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.name.length>22?a.name.slice(0,20)+'…':a.name}</span>
+        </div>
+      </td>
+      ${cols.showCalls?`<td><div class="mini-bar-outer"><div class="mini-bar-inner" style="background:${pCol(a.answered/mxC)}" data-w="${cW}"></div></div><span class="vl" style="color:${pCol(a.answered/mxC)};font-size:12px">${a.answered}</span></td>`:''}
+      ${cols.showVOC?`<td>${a.voc!=null?`<div class="mini-bar-outer"><div class="mini-bar-inner" style="background:${vCol(a.voc)}" data-w="${vW}"></div></div><span class="vl" style="color:${vCol(a.voc)};font-size:11px">${(a.voc*100).toFixed(0)}%</span>`:'<span style="color:#9490B0;font-size:9px">—</span>'}</td>`:''}
+      ${cols.showHold?`<td><div class="mini-bar-outer"><div class="mini-bar-inner" style="background:${hCol(a.holdPct)}" data-w="${hW}"></div></div><span class="vl" style="color:${hCol(a.holdPct)};font-size:11px">${(a.holdPct*100).toFixed(0)}%</span></td>`:''}
+      ${cols.showAHT?`<td>${a.aht?`<div class="mini-bar-outer"><div class="mini-bar-inner" style="background:${aCol(a.aht,mxA)}" data-w="${aW}"></div></div><span class="vl" style="color:${aCol(a.aht,mxA)};font-size:11px">${Math.round(a.aht)}s</span>`:'<span style="color:#9490B0;font-size:9px">—</span>'}</td>`:''}
+      ${cols.showSurveys?`<td style="font-size:12px;font-weight:600;color:#5A566E">${a.surveys}</td>`:''}
+      ${cols.showShare?`<td style="font-weight:800;color:${agentColor};font-size:11px;font-family:'Space Grotesk',sans-serif">${a.contrib.toFixed(1)}%</td>`:''}
+      ${cols.showTarget?`<td style="font-weight:800;font-size:11px;color:${tC};font-family:'Space Grotesk',sans-serif">${a.tgtPct.toFixed(0)}%</td>`:''}
+      ${cols.showStatus?`<td><span class="pill p${st.c.slice(1)}" style="font-size:10px">${st.l}</span></td>`:''}
     </tr>`;
   }).join('');
   setTimeout(animateBars,50);
 }
+
 // ─── Render all ───
 function renderAll(){ renderKPIs(); renderStar(); renderTVA(); renderPerf(); renderDonut(); renderContrib(); renderTable(); }
 
@@ -687,7 +982,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   applyTheme();
   applyBranding();
   setOvMsg('Loading dashboard…'); setProgress(30);
-  setTimeout(()=>{ setProgress(70); setOvMsg('Building visuals…'); fetchSheetData(); }, 350);
+  setTimeout(()=>{ setProgress(70); setOvMsg('Building visuals…'); fetchSheetData(); },350);
 });
 </script>
 </body>
