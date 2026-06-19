@@ -690,5 +690,30 @@ window.addEventListener('DOMContentLoaded',()=>{
   setTimeout(()=>{ setProgress(70); setOvMsg('Building visuals…'); fetchSheetData(); }, 350);
 });
 </script>
+   <script>
+(function(){
+  let direction = 1, pos = 0, paused = false, resumeTimer;
+  const speed = 0.6;
+  function scroll(){
+    if(!paused){
+      const max = document.body.scrollHeight - window.innerHeight;
+      pos += speed * direction;
+      if(pos >= max){ pos = max; direction = -1; }
+      if(pos <= 0)  { pos = 0;  direction =  1; }
+      window.scrollTo({ top: pos, behavior: 'instant' });
+    }
+    requestAnimationFrame(scroll);
+  }
+  function pause(){
+    paused = true;
+    clearTimeout(resumeTimer);
+    resumeTimer = setTimeout(()=>{ paused = false; }, 4000);
+  }
+  ['wheel','touchstart','mousedown','keydown'].forEach(e =>
+    window.addEventListener(e, pause, { passive:true })
+  );
+  setTimeout(()=> requestAnimationFrame(scroll), 2000);
+})();
+</script>
 </body>
 </html>
