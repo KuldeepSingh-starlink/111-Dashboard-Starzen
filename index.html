@@ -562,4 +562,596 @@ tbody td{padding:8px 9px;color:#2E2A3A;overflow:hidden}
   <div class="dash-footer"><span>🔴 Review = VOC below threshold or Hold% too high · Rows highlighted red are critical</span><div class="footer-r"><span id="footerTxt2"></span></div></div>
 </div>
 
-</div><!-- #stage -->
+</div><!-- #stage --></div><!-- #stage -->
+
+<script>
+// ══════════════════════════════════════════
+// CONFIG SHORTHANDS
+// ══════════════════════════════════════════
+const C=DASHBOARD_CONFIG,T=C.targets,TH=C.theme;
+const AVC=['#E74C3C','#9B59B6','#2980B9','#27AE60','#F39C12','#1ABC9C','#E67E22','#8E44AD','#2ECC71','#3498DB','#E91E63','#FF5722','#00BCD4','#4CAF50','#FF9800'];
+let INDIA=[...C.fallbackIndia],QATAR=[...C.fallbackQatar];
+let donutInst=null,currentPage=0,autoTimer=null,activeLeaderTeam='india';
+const TOTAL_PAGES=6,PAGE_SECS=60;
+
+// ══════════════════════════════════════════
+// THEME
+// ══════════════════════════════════════════
+function applyTheme(){
+  document.getElementById('themeStyle').textContent=`
+    :root{
+      --base:${TH.purpleBase};--dark:${TH.purpleDark};--mid:${TH.purpleMid};
+      --accent:${TH.purpleMid};--light:${TH.purpleLight};--border:${TH.purpleLight};
+      --tint:${TH.purpleTint};--pale:${TH.purplePale};
+      --orange:${TH.orange};--orangeDark:${TH.orangeDark};--orangeLight:${TH.orangeLight};--paleorange:${TH.orangePale};
+    }`;
+}
+
+// ══════════════════════════════════════════
+// COLOUR HELPERS
+// ══════════════════════════════════════════
+function pCol(r){return r>=.9?T.barColourHigh:r>=.7?T.barColourMid:T.barColourLow}
+function vCol(v){return v>=T.vocHigh?T.barColourHigh:v>=T.vocLow?T.barColourMid:T.barColourLow}
+function hCol(p){return p<=T.holdLow?T.barColourHigh:p<=T.holdHigh?T.barColourMid:T.barColourLow}
+function ini(n){return n.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase()}
+
+function animateBars(){
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('[data-w]').forEach(el=>{el.style.width=el.getAttribute('data-w')+'%'});
+  });
+}
+
+// ══════════════════════════════════════════
+// OVERLAY / PROGRESS
+// ══════════════════════════════════════════
+function setProgress(p){document.getElementById('ovProg').style.width=p+'%'}
+function setOvMsg(m){document.getElementById('ovMsg').textContent=m}
+function hideOverlay(){document.getElementById('overlay').classList.add('hidden')}
+function setSyncState(s,msg){
+  const d=document.getElementById('syncDot'),m=document.getElementById('syncMsg');
+  if(d)d.className='sync-dot'+(s==='loading'?' loading':s==='error'?' error':'');
+  if(m)m.textContent=msg;
+}
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function goTo(p){
+  if(p<0)p=TOTAL_PAGES-1;
+  if(p>=TOTAL_PAGES)p=0;
+  currentPage=p;
+  document.getElementById('stage').style.transform=`translateX(-${p*100}vw)`;
+  for(let i=0;i<TOTAL_PAGES;i++){
+    const d=document.getElementById('dots'+i);
+    if(d){d.querySelectorAll('.pdot').forEach((dot,idx)=>{dot.classList.toggle('active',idx===p)});}
+  }
+  resetAutoTimer();
+  startProgress();
+}
+function resetAutoTimer(){
+  clearInterval(autoTimer);
+  autoTimer=setInterval(()=>goTo(currentPage+1),PAGE_SECS*1000);
+}
+function startProgress(){
+  const b=document.getElementById('progressBar');
+  if(!b)return;
+  b.style.transition='none';b.style.width='0%';
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      b.style.transition=`width ${PAGE_SECS}s linear`;
+      b.style.width='100%';
+    });
+  });
+}
+
+// ══════════════════════════════════════════
+// DOT NAV INIT
+// ══════════════════════════════════════════
+function initDots(){
+  for(let p=0;p<TOTAL_PAGES;p++){
+    const el=document.getElementById('dots'+p);
+    if(!el)continue;
+    el.innerHTML='';
+    for(let i=0;i<TOTAL_PAGES;i++){
+      const b=document.createElement('button');
+      b.className='pdot'+(i===currentPage?' active':'');
+      b.onclick=(()=>{const pg=i;return()=>goTo(pg);})();
+      el.appendChild(b);
+    }
+  }
+}
+
+// ══════════════════════════════════════════
+// PARTICLES
+// ══════════════════════════════════════════
+function initParticles(id){
+  const cv=document.getElementById(id);
+  if(!cv)return;
+  const ctx=cv.getContext('2d');
+  cv.width=cv.offsetWidth||window.innerWidth;
+  cv.height=cv.offsetHeight||76;
+  const pts=Array.from({length:18},()=>({
+    x:Math.random()*cv.width,y:Math.random()*cv.height,
+    vx:(Math.random()-.5)*0.5,vy:(Math.random()-.5)*0.3,r:Math.random()*2+1
+  }));
+  function draw(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    pts.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0||p.x>cv.width)p.vx*=-1;
+      if(p.y<0||p.y>cv.height)p.vy*=-1;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,255,255,0.45)';ctx.fill();
+    });
+    pts.forEach((a,i)=>pts.slice(i+1).forEach(b=>{
+      const d=Math.hypot(a.x-b.x,a.y-b.y);
+      if(d<110){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
+        ctx.strokeStyle=`rgba(255,255,255,${0.18*(1-d/110)})`;ctx.lineWidth=0.7;ctx.stroke();}
+    }));
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ══════════════════════════════════════════
+// STAR SPARKLE (page 1)
+// ══════════════════════════════════════════
+function initStarSparkles(){
+  const cv=document.getElementById('starSparkle');
+  if(!cv)return;
+  const ctx=cv.getContext('2d');
+  cv.width=cv.offsetWidth||800;cv.height=cv.offsetHeight||400;
+  const sp=Array.from({length:30},()=>({
+    x:Math.random()*cv.width,y:Math.random()*cv.height,
+    size:Math.random()*3+1,speed:Math.random()*0.8+0.2,
+    opacity:Math.random(),dir:Math.random()*Math.PI*2
+  }));
+  function draw(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    sp.forEach(s=>{
+      s.x+=Math.cos(s.dir)*s.speed;s.y+=Math.sin(s.dir)*s.speed;
+      s.opacity+=0.02*(Math.random()-.5);
+      s.opacity=Math.max(0.1,Math.min(0.7,s.opacity));
+      if(s.x<0||s.x>cv.width||s.y<0||s.y>cv.height){
+        s.x=Math.random()*cv.width;s.y=Math.random()*cv.height;
+      }
+      ctx.save();ctx.globalAlpha=s.opacity;
+      ctx.fillStyle='#FF7722';
+      ctx.beginPath();ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ══════════════════════════════════════════
+// BRANDING
+// ══════════════════════════════════════════
+function applyBranding(){
+  document.title=C.branding.title;
+  document.querySelectorAll('.hdr-sub').forEach(el=>{
+    el.textContent=`${C.branding.subtitle} · ${C.branding.periodLabel}`;
+  });
+  document.getElementById('tgtInput').value=T.defaultDailyTarget;
+  document.getElementById('swHigh').style.background=T.barColourHigh;
+  document.getElementById('swMid').style.background=T.barColourMid;
+  document.getElementById('swLow').style.background=T.barColourLow;
+  if(C.googleSheets.sheetId){
+    document.getElementById('sheetIdInput').value=C.googleSheets.sheetId;
+    document.getElementById('gidInput').value=C.googleSheets.gid||'0';
+  }
+}
+
+// ══════════════════════════════════════════
+// GOOGLE SHEETS SYNC
+// ══════════════════════════════════════════
+function parseGvizRow(row){
+  const cells=row.c||[];
+  const g=i=>{const c=cells[i];return(c&&c.v!==null&&c.v!==undefined)?c.v:null};
+  return{id:g(0),name:String(g(1)||''),team:String(g(2)||''),
+    surveys:Number(g(3))||0,voc:g(4)!==null?Number(g(4)):null,
+    answered:Number(g(5))||0,holdPct:g(7)!==null?Number(g(7)):0,
+    aht:g(13)!==null?Number(g(13)):null};
+}
+
+async function fetchSheetData(){
+  const sheetId=document.getElementById('sheetIdInput').value.trim();
+  if(!sheetId){
+    setSyncState('error','No Sheet ID — using built-in data');
+    INDIA=[...C.fallbackIndia];QATAR=[...C.fallbackQatar];
+    renderAll();hideOverlay();return;
+  }
+  setSyncState('loading','Fetching…');
+  setOvMsg('Connecting to Google Sheets…');setProgress(20);
+  const gid=document.getElementById('gidInput').value.trim()||'0';
+  const url=`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
+  try{
+    const res=await fetch(url);
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const text=await res.text();
+    setProgress(60);setOvMsg('Parsing data…');
+    const json=JSON.parse(text.replace(/^[^\{]+/,'').replace(/\);\s*$/,''));
+    const rows=((json.table||{}).rows)||[];
+    const all=rows.slice(1).map(parseGvizRow).filter(a=>a.name&&a.name.length>2);
+    const tA=C.teams.teamA.sheetLabel.toLowerCase();
+    const tB=C.teams.teamB.sheetLabel.toLowerCase();
+    const india=all.filter(a=>a.team.toLowerCase().includes(tA));
+    const qatar=all.filter(a=>a.team.toLowerCase().includes(tB));
+    if(india.length)INDIA=india;else INDIA=[...C.fallbackIndia];
+    if(qatar.length)QATAR=qatar;else QATAR=[...C.fallbackQatar];
+    const now=new Date().toLocaleTimeString();
+    setSyncState('ok',`Synced ${now} · ${INDIA.length} India, ${QATAR.length} Qatar`);
+    setProgress(100);setOvMsg('Loaded!');
+  }catch(err){
+    console.warn('Sheet error:',err.message);
+    setSyncState('error','Sheet unreachable — using built-in data');
+    INDIA=[...C.fallbackIndia];QATAR=[...C.fallbackQatar];
+    setProgress(100);setOvMsg('Using built-in data');
+  }
+  setTimeout(hideOverlay,500);
+  renderAll();
+}
+
+setInterval(()=>{
+  if(document.getElementById('sheetIdInput')?.value.trim())fetchSheetData();
+},C.googleSheets.autoRefreshMinutes*60*1000);
+
+// ══════════════════════════════════════════
+// PAGE 0 — KPIs + INFOGRAPHIC CARDS
+// ══════════════════════════════════════════
+function renderKPIs(){
+  const act=INDIA.filter(a=>a.answered>0);
+  const tot=INDIA.reduce((s,a)=>s+a.answered,0);
+  const vV=INDIA.filter(a=>a.voc!==null&&a.surveys>0);
+  const aV=act.filter(a=>a.aht);
+  const avgV=vV.length?vV.reduce((s,a)=>s+a.voc,0)/vV.length:0;
+  const avgA=aV.length?aV.reduce((s,a)=>s+a.aht,0)/aV.length:0;
+  const surv=INDIA.reduce((s,a)=>s+a.surveys,0);
+  const avgH=act.length?act.reduce((s,a)=>s+a.holdPct,0)/act.length:0;
+  const highHold=act.filter(a=>a.holdPct>T.holdHigh).length;
+
+  document.getElementById('kpiStrip').innerHTML=`
+    <div class="kpi"><div class="kpi-lbl">Total Calls</div><div class="kpi-val">${tot.toLocaleString()}</div><div class="kpi-sub">India inbound today</div><i class="ti ti-phone-call kpi-ico"></i></div>
+    <div class="kpi"><div class="kpi-lbl">Avg VOC</div><div class="kpi-val">${(avgV*100).toFixed(1)}%</div><div class="kpi-sub">Team satisfaction</div><i class="ti ti-star kpi-ico"></i></div>
+    <div class="kpi"><div class="kpi-lbl">Avg AHT</div><div class="kpi-val">${Math.round(avgA)}s</div><div class="kpi-sub">Handle time</div><i class="ti ti-clock kpi-ico"></i></div>
+    <div class="kpi"><div class="kpi-lbl">Surveys</div><div class="kpi-val">${surv}</div><div class="kpi-sub">Received today</div><i class="ti ti-clipboard-list kpi-ico"></i></div>
+    <div class="kpi${highHold>0?' alert':''}"><div class="kpi-lbl">Active Agents</div><div class="kpi-val">${act.length}<span style="font-size:15px;font-weight:500;color:#9490B0">/${INDIA.length}</span></div><div class="kpi-sub">${highHold>0?`⚠ ${highHold} high hold`:'All within hold limit'}</div><i class="ti ti-users kpi-ico"></i></div>`;
+
+  // Infographic Card 1: Top Callers bar (dark glass)
+  const top5=act.sort((a,b)=>b.answered-a.answered).slice(0,5);
+  const mx=top5[0]?.answered||1;
+  document.getElementById('card1').innerHTML=`
+    <div class="mc-label on-dark"><i class="ti ti-chart-bar" style="margin-right:4px"></i>Top Callers Today</div>
+    ${top5.map((a,i)=>`
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:9px">
+        <span style="font-size:10px;color:${AVC[i]};font-weight:800;width:14px;flex-shrink:0">${i+1}</span>
+        <span style="font-size:11px;font-weight:700;color:#fff;width:70px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.name.split(' ')[0]}</span>
+        <div style="flex:1;height:12px;background:rgba(255,255,255,0.08);border-radius:6px;overflow:hidden;position:relative">
+          <div style="height:100%;background:${AVC[i]};border-radius:6px;width:0;transition:width 1.2s" data-w="${Math.round(a.answered/mx*100)}"></div>
+        </div>
+        <span style="font-size:11px;font-weight:900;color:${AVC[i]};width:32px;text-align:right;font-family:'Space Grotesk',sans-serif">${a.answered}</span>
+      </div>`).join('')}`;
+
+  // Infographic Card 2: VOC Breakdown (purple/dark)
+  const vocAbove=INDIA.filter(a=>a.voc!=null&&a.voc>=T.vocHigh).length;
+  const vocMid2=INDIA.filter(a=>a.voc!=null&&a.voc>=T.vocLow&&a.voc<T.vocHigh).length;
+  const vocBelow=INDIA.filter(a=>a.voc!=null&&a.voc<T.vocLow).length;
+  const vocTotal=vocAbove+vocMid2+vocBelow||1;
+  document.getElementById('card2').innerHTML=`
+    <div class="mc-label" style="color:rgba(196,174,240,0.8)"><i class="ti ti-star-filled" style="margin-right:4px;color:#27AE60"></i>VOC Score Breakdown</div>
+    <div style="font-size:46px;font-weight:900;line-height:1;font-family:'Space Grotesk',sans-serif;color:#27AE60">${(avgV*100).toFixed(0)}<span style="font-size:18px;color:rgba(196,174,240,0.5)">%</span></div>
+    <div style="font-size:9px;color:rgba(196,174,240,0.45);margin-bottom:10px">Team average VOC</div>
+    <div style="display:flex;gap:7px">
+      <div style="flex:1;text-align:center;background:rgba(39,174,96,0.18);border:1px solid rgba(39,174,96,0.3);border-radius:8px;padding:7px 4px">
+        <div style="font-size:24px;font-weight:900;color:#27AE60;font-family:'Space Grotesk',sans-serif">${vocAbove}</div>
+        <div style="font-size:8px;color:rgba(255,255,255,0.65);margin-top:2px">★ High</div>
+      </div>
+      <div style="flex:1;text-align:center;background:rgba(243,156,18,0.15);border:1px solid rgba(243,156,18,0.25);border-radius:8px;padding:7px 4px">
+        <div style="font-size:24px;font-weight:900;color:#F39C12;font-family:'Space Grotesk',sans-serif">${vocMid2}</div>
+        <div style="font-size:8px;color:rgba(255,255,255,0.65);margin-top:2px">◎ Mid</div>
+      </div>
+      <div style="flex:1;text-align:center;background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.25);border-radius:8px;padding:7px 4px">
+        <div style="font-size:24px;font-weight:900;color:#E74C3C;font-family:'Space Grotesk',sans-serif">${vocBelow}</div>
+        <div style="font-size:8px;color:rgba(255,255,255,0.65);margin-top:2px">⚠ Low</div>
+      </div>
+    </div>
+    <div style="margin-top:9px;height:7px;border-radius:4px;overflow:hidden;background:rgba(255,255,255,0.08);display:flex">
+      <div style="background:#27AE60;width:${vocAbove/vocTotal*100}%;transition:width 1.2s;border-radius:4px 0 0 4px"></div>
+      <div style="background:#F39C12;width:${vocMid2/vocTotal*100}%;transition:width 1.2s"></div>
+      <div style="background:#E74C3C;width:${vocBelow/vocTotal*100}%;transition:width 1.2s;border-radius:0 4px 4px 0"></div>
+    </div>`;
+
+  // Infographic Card 3: Hold Health (light)
+  document.getElementById('card3').innerHTML=`
+    <div class="mc-label on-light"><i class="ti ti-clock-pause" style="margin-right:4px;color:#FF7722"></i>Hold Rate Health</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:8px;margin-bottom:8px;background:${highHold>0?'#FFEBEE':'#E8F5E9'};border:1px solid ${highHold>0?'#FFCDD2':'#C8E6C9'}">
+      <span style="font-size:11px;font-weight:700;color:${highHold>0?'#C0392B':'#1B5E20'}">${highHold>0?`⚠ ${highHold} agents above hold limit`:'✓ All agents within hold limit'}</span>
+      <span style="font-size:22px;font-weight:900;font-family:'Space Grotesk',sans-serif;color:${hCol(avgH)}">${(avgH*100).toFixed(1)}%</span>
+    </div>
+    <div style="font-size:9px;color:#9490B0;margin-bottom:10px;text-align:right">team avg</div>
+    <div style="display:flex;gap:8px;flex:1">
+      <div style="flex:1;background:rgba(39,174,96,0.1);border-radius:10px;border:1px solid rgba(39,174,96,0.2);padding:10px 8px;text-align:center;display:flex;flex-direction:column;justify-content:center">
+        <div style="font-size:28px;font-weight:900;color:#27AE60;font-family:'Space Grotesk',sans-serif">${act.filter(a=>a.holdPct<=T.holdLow).length}</div>
+        <div style="font-size:9px;color:#5A566E;margin-top:2px">Low ✓</div>
+      </div>
+      <div style="flex:1;background:rgba(243,156,18,0.1);border-radius:10px;border:1px solid rgba(243,156,18,0.2);padding:10px 8px;text-align:center;display:flex;flex-direction:column;justify-content:center">
+        <div style="font-size:28px;font-weight:900;color:#F39C12;font-family:'Space Grotesk',sans-serif">${act.filter(a=>a.holdPct>T.holdLow&&a.holdPct<=T.holdHigh).length}</div>
+        <div style="font-size:9px;color:#5A566E;margin-top:2px">Mid</div>
+      </div>
+      <div style="flex:1;background:${highHold>0?'rgba(231,76,60,0.1)':'rgba(45,22,102,0.05)'};border-radius:10px;border:1px solid ${highHold>0?'rgba(231,76,60,0.25)':'rgba(196,174,240,0.15)'};padding:10px 8px;text-align:center;display:flex;flex-direction:column;justify-content:center">
+        <div style="font-size:28px;font-weight:900;color:#C0392B;font-family:'Space Grotesk',sans-serif">${highHold}</div>
+        <div style="font-size:9px;color:#5A566E;margin-top:2px">High ⚠</div>
+      </div>
+    </div>`;
+
+  setTimeout(animateBars,80);
+}
+
+// ══════════════════════════════════════════
+// PAGE 1 — STAR PERFORMER
+// ══════════════════════════════════════════
+function renderStar(){
+  const W=C.starWeights;
+  const sc=INDIA.filter(a=>a.answered>0).map(a=>({...a,
+    score:(a.voc||0)*W.voc+Math.min(a.answered/160,1)*W.calls+(1-Math.min(a.holdPct,1))*W.hold+Math.min(a.surveys/10,1)*W.surveys
+  })).sort((a,b)=>b.score-a.score);
+  if(!sc.length)return;
+  const s=sc[0],runners=sc.slice(1,4);
+  const svgIllus=`<svg width="110" height="110" viewBox="0 0 110 110" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);opacity:0.15;pointer-events:none">
+    <circle cx="55" cy="55" r="48" fill="none" stroke="#FF7722" stroke-width="1.5" style="animation:pulseRing 3s ease-in-out infinite"/>
+    <polygon points="55,15 65,42 94,42 71,59 80,86 55,70 30,86 39,59 16,42 45,42" fill="rgba(255,119,34,0.2)" stroke="#FF7722" stroke-width="1.5" style="animation:rotateSlow 18s linear infinite;transform-origin:55px 55px"/>
+  </svg>`;
+  document.getElementById('starSection').innerHTML=`
+    <div class="star-card" style="position:relative">
+      ${svgIllus}
+      <div class="orb" style="width:160px;height:160px;background:radial-gradient(circle,rgba(255,119,34,0.15),transparent 70%);position:absolute;top:-30px;right:80px;border-radius:50%;pointer-events:none;animation:floatUp 4s ease-in-out infinite"></div>
+      <div class="orb" style="width:100px;height:100px;background:radial-gradient(circle,rgba(124,82,204,0.18),transparent 70%);position:absolute;bottom:-10px;left:20px;border-radius:50%;pointer-events:none;animation:floatUp 5s ease-in-out infinite 1.5s"></div>
+      <div class="star-top-label">⭐ Top Performer — ${C.branding.periodLabel}</div>
+      <div class="star-body">
+        <div class="star-trophy">🏆</div>
+        <div class="star-info">
+          <div class="star-name">${s.name}</div>
+          <div class="star-role">Inbound Voice · India · CISCO: ${s.id||'—'}</div>
+          <div class="star-score-badge"><i class="ti ti-award" style="font-size:12px"></i> Score: ${Math.round(s.score)} / 100</div>
+        </div>
+      </div>
+      <div class="star-metrics">
+        <div class="sm-item"><div class="sm-val">${s.answered}</div><div class="sm-lbl">Calls</div></div>
+        <div class="sm-item"><div class="sm-val" style="color:${vCol(s.voc||0)}">${s.voc?(s.voc*100).toFixed(0)+'%':'—'}</div><div class="sm-lbl">VOC</div></div>
+        <div class="sm-item"><div class="sm-val" style="color:${hCol(s.holdPct)}">${(s.holdPct*100).toFixed(0)}%</div><div class="sm-lbl">Hold</div></div>
+        <div class="sm-item"><div class="sm-val">${s.surveys}</div><div class="sm-lbl">Surveys</div></div>
+        <div class="sm-item"><div class="sm-val">${Math.round(s.aht||0)}s</div><div class="sm-lbl">AHT</div></div>
+        <div class="sm-item"><div class="sm-val" style="color:#FF7722">${Math.round(s.score)}</div><div class="sm-lbl">Score</div></div>
+      </div>
+    </div>`;
+
+  // Banner runner-ups
+  const bannerEl=document.getElementById('bannerSection');
+  if(bannerEl){
+    bannerEl.innerHTML=`
+      <div class="banner-content">
+        <div class="banner-label">🥈 Runner-Ups This Period</div>
+        <div class="banner-title" style="font-size:30px;font-weight:900;color:#fff;font-family:'Space Grotesk',sans-serif;line-height:1.1;text-shadow:0 2px 12px rgba(0,0,0,0.5)">Keep <em style="color:#FF7722;font-style:normal">Rising</em>,<br/>India Team</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);margin-bottom:14px">${C.branding.periodLabel} · ${INDIA.length} agents</div>
+        <div class="runner-up-list">${runners.map((r,i)=>`
+          <div class="runner-item">
+            <span class="runner-rank">#${i+2}</span>
+            <span class="runner-name">${r.name.split(' ').slice(0,2).join(' ')}</span>
+            <span class="runner-score">${Math.round(r.score)} pts</span>
+          </div>`).join('')}</div>
+        <svg style="position:absolute;right:10px;bottom:10px;opacity:0.1;pointer-events:none" width="90" height="90" viewBox="0 0 90 90">
+          <polygon points="45,5 56,33 86,33 63,51 72,79 45,62 18,79 27,51 4,33 34,33" fill="none" stroke="#FF7722" stroke-width="2" style="animation:rotateSlow 22s linear infinite;transform-origin:45px 45px"/>
+        </svg>
+      </div>`;
+  }
+}
+
+// ══════════════════════════════════════════
+// PAGE 2 — TARGET vs ACHIEVEMENT
+// ══════════════════════════════════════════
+function renderTVA(){
+  const tgt=parseInt(document.getElementById('tgtInput').value)||T.defaultDailyTarget;
+  const act=INDIA.filter(a=>a.answered>0).sort((a,b)=>b.answered-a.answered);
+  const col1count=Math.ceil(act.length*0.6);
+  const colA=act.slice(0,col1count),colB=act.slice(col1count);
+  function makeTVAItem(a){
+    const ratio=a.answered/tgt,w=Math.min(ratio*100,100).toFixed(1),col=pCol(ratio),fail=ratio<.7;
+    return `<div class="tva-item">
+      <div class="tva-name-row">
+        <span class="tva-name${fail?' fail':''}">${a.name.split(' ')[0]}${fail?`<span class="fail-badge">BELOW</span>`:''}</span>
+        <span class="tva-val" style="color:${col}">${a.answered}/${tgt}</span>
+      </div>
+      <div class="tva-track"><div class="tva-fill" style="background:${col}" data-w="${w}"><span>${ratio>=1?'✓':Math.round(ratio*100)+'%'}</span></div></div>
+    </div>`;
+  }
+  const top8=act.slice(0,8),maxAns=top8[0]?.answered||1;
+  const bar3d=`<div class="bar3d-container">
+    <div class="bar3d-title"><i class="ti ti-chart-bar-popular" style="font-size:11px"></i>Top Agents — 3D View</div>
+    <div class="bar3d-chart">${top8.map((a,i)=>{
+      const h=Math.round(a.answered/maxAns*80);
+      return `<div class="bar3d-col">
+        <div class="bar3d-val" style="color:${AVC[i]}">${a.answered}</div>
+        <div class="bar3d-bar" style="height:${h}px;background:linear-gradient(135deg,${AVC[i]},${AVC[i]}88)"></div>
+        <div class="bar3d-name">${a.name.split(' ')[0]}</div>
+      </div>`;
+    }).join('')}</div>
+  </div>`;
+  document.getElementById('tvaGrid').innerHTML=`
+    <div class="card-full" style="overflow-y:auto"><div class="ct"><i class="ti ti-target"></i>Agents (Top ${colA.length})</div>${colA.map(makeTVAItem).join('')}</div>
+    <div class="card-full" style="display:flex;flex-direction:column;overflow:hidden">
+      <div class="ct"><i class="ti ti-target"></i>Agents (${colA.length+1}–${act.length})</div>
+      <div style="flex:1;overflow-y:auto">${colB.map(makeTVAItem).join('')}</div>
+      ${bar3d}
+    </div>`;
+  animateBars();
+}
+
+// ══════════════════════════════════════════
+// PAGE 3 — PERFORMANCE BARS
+// ══════════════════════════════════════════
+function renderPerf(){
+  const act=INDIA.filter(a=>a.answered>0).sort((a,b)=>b.answered-a.answered);
+  const mxC=act[0]?.answered||1,mxA=Math.max(...act.filter(a=>a.aht).map(a=>a.aht),1);
+  const half=Math.ceil(act.length/2),colA=act.slice(0,half),colB=act.slice(half);
+  function makePerfItem(a,i){
+    const cW=Math.round(a.answered/mxC*100),vW=a.voc!=null?Math.round(a.voc*100):0;
+    const hW=Math.round(Math.max(0,(1-a.holdPct*2))*100),aW=a.aht?Math.round(Math.max(0,(1-a.aht/mxA))*100):0;
+    const av=AVC[i%AVC.length];
+    const vocFail=a.voc!=null&&a.voc<T.vocLow,holdFail=a.holdPct>T.holdHigh;
+    return `<div class="perf-item">
+      <div class="perf-head">
+        <span class="perf-rank" style="color:${i<3?av:'#9490B0'}">${i+1}</span>
+        <div class="perf-avatar" style="background:${av}">${ini(a.name)}</div>
+        <span class="perf-name">${a.name.split(' ').slice(0,2).join(' ')}</span>
+        ${vocFail?'<span class="fail-badge">VOC⚠</span>':''}${holdFail?'<span class="fail-badge">HOLD⚠</span>':''}
+      </div>
+      <div class="perf-bars">
+        <div class="bar-row"><span class="bar-lbl">Calls</span><div class="bar-outer"><div class="bar-inner" style="background:${pCol(a.answered/mxC)}" data-w="${cW}"></div></div><span class="bar-tip" style="color:${pCol(a.answered/mxC)}">${a.answered}</span></div>
+        <div class="bar-row"><span class="bar-lbl">VOC</span><div class="bar-outer"><div class="bar-inner" style="background:${vCol(a.voc||0)}" data-w="${vW}"></div></div><span class="bar-tip${vocFail?' bad':''}" style="color:${vCol(a.voc||0)}">${a.voc?(a.voc*100).toFixed(0)+'%':'—'}</span></div>
+        <div class="bar-row"><span class="bar-lbl">Hold</span><div class="bar-outer"><div class="bar-inner" style="background:${hCol(a.holdPct)}" data-w="${hW}"></div></div><span class="bar-tip${holdFail?' bad':''}" style="color:${hCol(a.holdPct)}">${(a.holdPct*100).toFixed(0)}%</span></div>
+        ${a.aht?`<div class="bar-row"><span class="bar-lbl">AHT</span><div class="bar-outer"><div class="bar-inner" style="background:#9B59B6" data-w="${aW}"></div></div><span class="bar-tip">${Math.round(a.aht)}s</span></div>`:''}
+      </div>
+    </div>`;
+  }
+  document.getElementById('perfGrid').innerHTML=`
+    <div class="card-full" style="overflow-y:auto">${colA.map((a,i)=>makePerfItem(a,i)).join('')}</div>
+    <div class="card-full" style="overflow-y:auto">${colB.map((a,i)=>makePerfItem(a,i+half)).join('')}</div>`;
+  animateBars();
+}
+
+// ══════════════════════════════════════════
+// PAGE 4 — CONTRIBUTION + VOC
+// ══════════════════════════════════════════
+function renderDonut(){
+  const act=INDIA.filter(a=>a.answered>0).sort((a,b)=>b.answered-a.answered);
+  const tot=act.reduce((s,a)=>s+a.answered,0)||1;
+  const cl=document.getElementById('contribList');
+  cl.innerHTML=act.map((a,i)=>{
+    const pct=(a.answered/tot*100).toFixed(1),bW=Math.round(a.answered/act[0].answered*100);
+    const cls=i===0?'top1':i===1?'top2':i===2?'top3':'rest';
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':null;
+    return `<div class="contrib-big ${cls}">
+      <div class="cb-rank" style="background:linear-gradient(135deg,${AVC[i]},${AVC[i]}cc)">${medal||i+1}</div>
+      <div style="flex:1;min-width:0">
+        <div class="cb-name${i<3?' top':''}">${a.name.split(' ').slice(0,2).join(' ')}</div>
+        <div class="cb-bar-outer" style="margin-top:5px"><div class="cb-bar-inner" style="background:${AVC[i]}" data-w="${bW}"></div></div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div class="cb-calls" style="color:${AVC[i]}">${a.answered}</div>
+        <div class="cb-pct">${pct}%</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // VOC sparklines
+  const vocA=INDIA.filter(a=>a.voc!=null&&a.answered>0).sort((a,b)=>b.voc-a.voc);
+  const vs=document.getElementById('vocSparkline');
+  if(vocA.length&&vs){
+    vs.style.display='';
+    document.getElementById('vocList').innerHTML='<div class="voc-title"><i class="ti ti-stars"></i>VOC Score Ranking</div>'+
+    vocA.map(a=>{
+      const w=Math.round((a.voc||0)*100),col=vCol(a.voc||0),low=a.voc<T.vocLow;
+      return `<div class="voc-spark-row-big">
+        <span class="voc-spark-lbl-big${low?' low':''}" style="color:${low?'#C0392B':col}">${a.name.split(' ')[0]}${low?' ⚠':''}</span>
+        <div class="voc-spark-track-big"><div class="voc-spark-fill-big" style="background:${col}" data-w="${w}"></div></div>
+        <span class="voc-spark-val-big${low?' low':''}" style="color:${col}">${w}%</span>
+      </div>`;
+    }).join('');
+  }
+  setTimeout(animateBars,80);
+}
+
+// ══════════════════════════════════════════
+// PAGE 5 — COMBINED LEADERBOARD
+// ══════════════════════════════════════════
+function switchTeamDropdown(){
+  const v=document.getElementById('teamDropdown')?.value||'india';
+  activeLeaderTeam=v;
+  renderLeaderCombined();
+}
+function renderLeaderCombined(){
+  const q=(document.getElementById('searchLeader')?.value||'').toLowerCase();
+  const tgt=parseInt(document.getElementById('tgtInput').value)||T.defaultDailyTarget;
+  const pool=activeLeaderTeam==='india'?INDIA:activeLeaderTeam==='qatar'?QATAR:[...INDIA,...QATAR];
+  const mxC=Math.max(...pool.map(a=>a.answered),1);
+  const totC=pool.reduce((s,a)=>s+a.answered,0)||1;
+  let data=pool.map(a=>({...a,contrib:a.answered/totC*100,tgtPct:a.answered/tgt*100}));
+  if(q)data=data.filter(a=>a.name.toLowerCase().includes(q)||String(a.id||'').includes(q));
+  data=[...data].sort((a,b)=>b.answered-a.answered);
+  function getStatus(a){
+    if(a.answered===0)return{l:'Inactive',c:'pb'};
+    if(a.voc!=null&&a.voc>=T.vocHigh&&a.holdPct<T.holdLow)return{l:'Top',c:'pg'};
+    if(a.voc==null||a.voc<T.vocLow||a.holdPct>T.holdHigh)return{l:'Review',c:'pr'};
+    return{l:'Good',c:'pa'};
+  }
+  function makeRow(a,i){
+    const st=getStatus(a),ac=AVC[i%AVC.length];
+    const cW=Math.round(a.answered/mxC*100),vW=a.voc!=null?Math.round(a.voc*100):0,hW=Math.round(a.holdPct*100);
+    const tC=a.answered>=tgt?T.barColourHigh:a.answered>=tgt*.8?T.barColourMid:T.barColourLow;
+    const isCrit=st.c==='pr',vocFail=a.voc!=null&&a.voc<T.vocLow,holdFail=a.holdPct>T.holdHigh;
+    return `<tr class="${isCrit?'row-critical':''}">
+      <td><span class="rank-chip" style="background:linear-gradient(135deg,${ac},${ac}cc)">${i+1}</span></td>
+      <td><div class="agent-cell"><span class="a-dot" style="background:${ac}"></span><span class="a-name">${a.name.length>20?a.name.slice(0,18)+'…':a.name}</span></div></td>
+      <td><div class="mini-bar-outer"><div class="mini-bar-inner" style="background:${pCol(a.answered/mxC)}" data-w="${cW}"></div></div><span class="vl" style="color:${pCol(a.answered/mxC)}">${a.answered}</span></td>
+      <td>${a.voc!=null?`<div class="mini-bar-outer"><div class="mini-bar-inner" style="background:${vCol(a.voc)}" data-w="${vW}"></div></div><span class="vl${vocFail?' bad':''}" style="color:${vCol(a.voc)}">${(a.voc*100).toFixed(0)}%</span>`:'<span style="color:#9490B0;font-size:8px">—</span>'}</td>
+      <td><div class="mini-bar-outer"><div class="mini-bar-inner" style="background:${hCol(a.holdPct)}" data-w="${hW}"></div></div><span class="vl${holdFail?' bad':''}" style="color:${hCol(a.holdPct)}">${(a.holdPct*100).toFixed(0)}%</span></td>
+      <td style="font-size:10px;font-weight:600;color:#5A566E">${a.surveys}</td>
+      <td style="font-weight:800;font-size:9px;color:${tC};font-family:'Space Grotesk',sans-serif">${a.tgtPct.toFixed(0)}%</td>
+      <td><span class="pill p${st.c.slice(1)}">${st.l}</span></td>
+    </tr>`;
+  }
+  const thead=`<tr>
+    <th style="width:28px">#</th><th style="width:130px">Agent</th>
+    <th style="width:80px">Calls</th><th style="width:72px">VOC</th>
+    <th style="width:72px">Hold%</th><th style="width:42px">Surv.</th>
+    <th style="width:48px">Tgt%</th><th style="width:52px">Status</th>
+  </tr>`;
+  const half=Math.ceil(data.length/2),colA=data.slice(0,half),colB=data.slice(half);
+  const el=document.getElementById('combinedLeader');
+  if(el)el.innerHTML=`
+    <div class="leader-col">
+      <div class="leader-col-header"><span class="col-title">Agents 1–${colA.length}</span><span class="col-count">${colA.length} agents</span></div>
+      <div class="leader-tbl-wrap"><table><thead>${thead}</thead><tbody>${colA.map((a,i)=>makeRow(a,i)).join('')}</tbody></table></div>
+    </div>
+    <div class="leader-col">
+      <div class="leader-col-header"><span class="col-title">Agents ${colA.length+1}–${data.length}</span><span class="col-count">${colB.length} agents</span></div>
+      <div class="leader-tbl-wrap"><table><thead>${thead}</thead><tbody>${colB.map((a,i)=>makeRow(a,i+colA.length)).join('')}</tbody></table></div>
+    </div>`;
+  const ft=document.getElementById('footerTxt2');
+  if(ft)ft.textContent=`${data.length} agents · Auto-advance every ${PAGE_SECS}s`;
+  setTimeout(animateBars,50);
+}
+
+// ══════════════════════════════════════════
+// RENDER ALL
+// ══════════════════════════════════════════
+function renderAll(){
+  renderKPIs();renderStar();renderTVA();renderPerf();renderDonut();renderLeaderCombined();
+}
+
+// ══════════════════════════════════════════
+// KEYBOARD NAV
+// ══════════════════════════════════════════
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')goTo(currentPage+1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')goTo(currentPage-1);
+});
+
+// ══════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════
+window.addEventListener('DOMContentLoaded',()=>{
+  applyTheme();
+  applyBranding();
+  initDots();
+  ['pc0','pc1','pc2','pc3','pc4','pc5'].forEach(initParticles);
+  initStarSparkles();
+  setOvMsg('Loading dashboard…');setProgress(30);
+  setTimeout(()=>{setProgress(70);setOvMsg('Building visuals…');fetchSheetData();},350);
+  resetAutoTimer();
+  startProgress();
+});
+</script>
+</body>
+</html>
